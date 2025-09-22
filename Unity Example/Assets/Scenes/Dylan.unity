@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!4 &64708669 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2317501519128154450, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
-  m_PrefabInstance: {fileID: 3267777909618622187}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &262154675
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,6 +614,11 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!4 &910333372 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2864174771948869176, guid: d956319ef258e834990185570c7f8339, type: 3}
+  m_PrefabInstance: {fileID: 625262579}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1286426321
 GameObject:
   m_ObjectHideFlags: 0
@@ -945,10 +945,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5234638554187327330, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: m_BodyType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: health
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
       propertyPath: player
       value: 
-      objectReference: {fileID: 64708669}
+      objectReference: {fileID: 910333372}
+    - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: respawn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: parryLevel
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: respawnDelay
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: baseParryChance
+      value: 0.797
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
