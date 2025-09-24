@@ -523,7 +523,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   wand: {fileID: 5672256301309360033}
-  wandSprite: {fileID: 0}
+  wandSprite: {fileID: 4603390866278502707}
   fireballPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
   fireballForce: 10
   wandDistance: 1.5
@@ -5455,7 +5455,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5672256301309360033}
   - component: {fileID: 4603390866278502707}
-  - component: {fileID: 3120616038916724377}
+  - component: {fileID: 3762962088343266692}
   m_Layer: 0
   m_Name: Wand
   m_TagString: Untagged
@@ -5473,7 +5473,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0.09953068, w: 0.99503446}
   m_LocalPosition: {x: 0.89, y: 0.3, z: 0}
-  m_LocalScale: {x: 0.1640625, y: 0.59375, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3609279118512411522}
@@ -5526,7 +5526,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 196522798228747210, guid: d6a2f725e47c71c48bdabccd6e776b22, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -5537,8 +5537,8 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &3120616038916724377
-BoxCollider2D:
+--- !u!60 &3762962088343266692
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -5581,5 +5581,14 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0, y: 0.21875}
+      - {x: -0.09375, y: 0.125}
+      - {x: -0.09375, y: -0.1875}
+      - {x: -0.03125, y: -0.25}
+      - {x: 0.0625, y: -0.21875}
+      - {x: 0.125, y: 0.03125}
+      - {x: 0.125, y: 0.1875}
+      - {x: 0.0625, y: 0.21875}
+  m_UseDelaunayMesh: 0
