@@ -522,13 +522,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24a2293cde129e843a16330737c339de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  firePoint: {fileID: 3609279118512411522}
-  fireballPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
   wand: {fileID: 5672256301309360033}
+  wandSprite: {fileID: 0}
+  fireballPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
   fireballForce: 10
   wandDistance: 1.5
-  wandTiltStrength: 10
   wandFollowSpeed: 10
+  wandLag: 0.1
   collisionMask:
     serializedVersion: 2
     m_Bits: 0
