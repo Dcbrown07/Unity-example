@@ -348,10 +348,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 553833880501904568, guid: d956319ef258e834990185570c7f8339, type: 3}
-      propertyPath: scaleXStretch
-      value: 1.1
-      objectReference: {fileID: 0}
     - target: {fileID: 1625997583060852650, guid: d956319ef258e834990185570c7f8339, type: 3}
       propertyPath: m_CameraType
       value: 0

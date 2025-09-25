@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: d6a2f725e47c71c48bdabccd6e776b22
+guid: 52ecb5c1d77cd9f4691b9cf14213e0db
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 196522798228747210
-    second: Wand_Normal_0
+      213: -8065542034003102242
+    second: Pong_Wizard_Walk_Down_0
+  - first:
+      213: -6214481468120563414
+    second: Pong_Wizard_Walk_Down_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +40,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +54,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +78,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,13 +103,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Wand_Normal_0
+      name: Pong_Wizard_Walk_Down_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 32
-        height: 32
+        x: 8
+        y: 39
+        width: 14
+        height: 20
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +118,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ac3b0ba91703ab200800000000000000
-      internalID: 196522798228747210
+      spriteID: ed5734ec040711090800000000000000
+      internalID: -8065542034003102242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pong_Wizard_Walk_Down_1
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 7
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a210d6dc70ab1c9a0800000000000000
+      internalID: -6214481468120563414
       vertices: []
       indices: 
       edges: []
@@ -135,7 +160,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Wand_Normal_0: 196522798228747210
+      Pong_Wizard_Walk_Down_0: -8065542034003102242
+      Pong_Wizard_Walk_Down_1: -6214481468120563414
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

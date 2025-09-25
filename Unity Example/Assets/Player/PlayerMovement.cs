@@ -5,6 +5,7 @@ public class PlayerController2D : MonoBehaviour
     [Header("Movement")]
     public float moveSpeed = 6f;
     private float moveInput;
+    private Animator animator;
 
     [Header("Jumping")]
     public float jumpForce = 14f;
@@ -46,6 +47,7 @@ public class PlayerController2D : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         wasGrounded = true;
+        animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -115,6 +117,11 @@ public class PlayerController2D : MonoBehaviour
     {
         // Horizontal movement
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+        if (Mathf.Abs(moveInput) > 0.1f && isGrounded) {
+            animator.SetBool("isRunning", true);
+        } else {
+            animator.SetBool("isRunning", false);
+        }
 
         // Better jump physics
         if (rb.linearVelocity.y < 0)
