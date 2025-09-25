@@ -325,26 +325,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   moveSpeed: 5
+  acceleration: 50
+  deceleration: 70
+  airAcceleration: 35
+  airDeceleration: 25
   jumpForce: 20
   coyoteTime: 0.15
   jumpBufferTime: 0.15
   fallMultiplier: 2.5
   lowJumpMultiplier: 2
   maxFallSpeed: -20
+  jumpCutMultiplier: 0.4
+  apexThreshold: 2
+  apexMultiplier: 0.5
+  apexHangTime: 0.1
   groundCheck: {fileID: 3368904492186447885}
-  groundCheckRadius: 0.2
+  groundCheckRadius: 0.3
   groundLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 64
   jumpDust: {fileID: 6176873833367218900}
   landingDust: {fileID: 6176873833367218900}
   walkDust: {fileID: 0}
-  enableSquashStretch: 1
+  enableSquashStretch: 0
   scaleXNormal: 1
   scaleYNormal: 1
   scaleXStretch: 1.2
   scaleYSquash: 0.8
   scaleSpeed: 20
+  landingBoostMultiplier: 1.1
+  turnAroundBoost: 1.2
+  dodgeBoost: 1.5
 --- !u!96 &5003661151261980286
 TrailRenderer:
   serializedVersion: 3
@@ -481,8 +492,7 @@ MonoBehaviour:
   fireballPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
   fireballForce: 10
   wandDistance: 1
-  wandFollowSpeed: 10
-  wandLag: 0.1
+  orbitSpeed: 8
   collisionMask:
     serializedVersion: 2
     m_Bits: 0

@@ -13,18 +13,43 @@ public class PongOrb : MonoBehaviour
     // internal state
     private Vector2 direction = Vector2.right;
     private SpriteRenderer sr;
+    private Rigidbody2D rb;
+    private bool usePhysics = true; // Use physics movement instead of manual
 
     void Start()
     {
         sr = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
         UpdateColor();
         Destroy(gameObject, lifetime); // auto cleanup
+        
+        // If we have a rigidbody and it has velocity, use physics movement
+        if (rb != null && rb.linearVelocity.magnitude > 0.1f)
+        {
+            usePhysics = true;
+            direction = rb.linearVelocity.normalized;
+        }
+        else
+        {
+            usePhysics = false;
+        }
     }
 
     void Update()
     {
-        // Move manually so physics won't "grab" it
-        transform.Translate(direction * speed * Time.deltaTime);
+        // Only use manual movement if we're not using physics
+        if (!usePhysics)
+        {
+            transform.Translate(direction * speed * Time.deltaTime);
+        }
+        else if (rb != null)
+        {
+            // Keep direction updated based on current velocity
+            if (rb.linearVelocity.magnitude > 0.1f)
+            {
+                direction = rb.linearVelocity.normalized;
+            }
+        }
     }
 
     // Public API the rest of your code expects
@@ -32,6 +57,11 @@ public class PongOrb : MonoBehaviour
     {
         if (dir.sqrMagnitude == 0) dir = Vector2.right;
         direction = dir.normalized;
+        
+        if (usePhysics && rb != null)
+        {
+            rb.linearVelocity = direction * speed;
+        }
     }
 
     public Vector2 GetDirection()
@@ -42,6 +72,11 @@ public class PongOrb : MonoBehaviour
     public void ReverseDirection()
     {
         direction = -direction;
+        
+        if (usePhysics && rb != null)
+        {
+            rb.linearVelocity = direction * speed;
+        }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -85,6 +120,12 @@ public class PongOrb : MonoBehaviour
         {
             Vector2 normal = collision.contacts[0].normal;
             direction = Vector2.Reflect(direction, normal).normalized;
+
+            // Update physics velocity to match new direction
+            if (usePhysics && rb != null)
+            {
+                rb.linearVelocity = direction * speed;
+            }
 
             // change orb type/color on bounce (optional)
             ToggleType();

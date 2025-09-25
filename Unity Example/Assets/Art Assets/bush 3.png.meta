@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 0af2867c7aab5fd4590417582c115143
+guid: 9dabbd96cc288634bab70e0ccd734e9a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6470653568274419442
-    second: Town_0
+      213: -2401867472789969915
+    second: bush 3_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Town_0
+      name: bush 3_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 4
         y: 0
-        width: 32
-        height: 32
+        width: 19
+        height: 10
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e01b366dcde9336a0800000000000000
-      internalID: -6470653568274419442
+      spriteID: 504e9c6524adaaed0800000000000000
+      internalID: -2401867472789969915
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Town_0: -6470653568274419442
+      bush 3_0: -2401867472789969915
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
