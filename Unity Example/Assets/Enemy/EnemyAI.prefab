@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 8948874905102024025}
   - component: {fileID: 5234638554187327330}
   - component: {fileID: 7176019973706128780}
-  - component: {fileID: 4508093394990421804}
+  - component: {fileID: 2467039173106822800}
   m_Layer: 0
   m_Name: EnemyAI
   m_TagString: Enemy
@@ -167,42 +167,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4f400e0d23f8b445a8157a8826bd760, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCharacter
-  maxHealth: 3
-  currentHealth: 0
+  health: 3
   moveSpeed: 2
   maxMoveSpeed: 5
-  jumpForce: 12
-  coyoteTime: 0.1
   aggressionLevel: 0.3
-  parrySkill: 0.2
-  aimAccuracy: 0.5
-  reactionSpeed: 0.4
-  obstacleNavigation: 0.6
+  reactionTime: 0.3
   preferredDistance: 4
   retreatDistance: 2
-  visionRange: 8
+  circleRadius: 3
   orbPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
   orbSpawnPoint: {fileID: 5746890766586388080}
   fireRate: 2
+  aimAccuracy: 0.5
   parryRange: 1.5
   parryDuration: 0.3
   dangerDetectionRange: 3
   player: {fileID: 0}
   groundCheck: {fileID: 7908837500026356185}
-  frontCheck: {fileID: 5626610743011603093}
-  ledgeCheck: {fileID: 7615779802511320218}
   groundCheckRadius: 0.2
-  frontCheckDistance: 0.8
-  ledgeCheckDistance: 1
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  healthBarParent: {fileID: 0}
-  healthPipPrefab: {fileID: 0}
   respawn: 0
   respawnDelay: 3
---- !u!60 &4508093394990421804
-PolygonCollider2D:
+--- !u!61 &2467039173106822800
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -245,13 +234,8 @@ PolygonCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Points:
-    m_Paths:
-    - - {x: -0.5, y: 0.5}
-      - {x: -0.5, y: -0.5}
-      - {x: 0.5, y: -0.5}
-      - {x: 0.5, y: 0.5}
-  m_UseDelaunayMesh: 0
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &5301337759651317845
 GameObject:
   m_ObjectHideFlags: 0
