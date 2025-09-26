@@ -79,8 +79,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 45178279
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: d46cf87437813484195d4a2eb2194538, type: 3}
   m_Color: {r: 0.9245283, g: 0.02180491, b: 0.02180491, a: 1}
@@ -135,7 +135,7 @@ MonoBehaviour:
   speed: 8
   currentType: 0
   owner: {fileID: 0}
-  lifetime: 20
+  lifetime: 15
 --- !u!60 &5277652419605204738
 PolygonCollider2D:
   m_ObjectHideFlags: 0
