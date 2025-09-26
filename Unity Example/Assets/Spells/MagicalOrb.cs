@@ -85,20 +85,27 @@ public class PongOrb : MonoBehaviour
         if (collision.gameObject == owner) return;
 
         // PLAYER HIT / PARRY
-        var player = collision.gameObject.GetComponent<PlayerCombat2D>();
-        if (player != null)
+        var playerCombat = collision.gameObject.GetComponent<PlayerCombat2D>();
+        if (playerCombat != null)
         {
-            if (player.IsParrying())
+            if (playerCombat.IsParrying())
             {
                 // reflect and make the new owner whoever parried
                 ReverseDirection();
                 owner = collision.gameObject;
                 Debug.Log("Orb parried by player and reflected.");
-                return; // don't destroy
+                return; // don't destroy or damage
             }
             else
             {
-                Debug.Log("Orb hit player.");
+                // Player got hit - deal damage
+                PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+                if (playerHealth != null)
+                {
+                    playerHealth.TakeDamage(1);
+                    Debug.Log("Orb hit player and dealt damage.");
+                }
+                
                 Destroy(gameObject);
                 return;
             }

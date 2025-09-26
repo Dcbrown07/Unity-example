@@ -6,43 +6,66 @@ public enum AIState
     Hunting,      // Moving to attack position
     Attacking,    // Actively shooting at player
     Retreating,   // Moving away from danger
-    Circling,     // Circling around player
-    Dodging       // Avoiding incoming orbs
+    Circling,     // Moving around player
+    Dodging,      // Avoiding incoming orbs
+    Jumping       // Jumping over obstacles
 }
 
 public class EnemyController : MonoBehaviour
 {
     [Header("Stats")]
-    public int health = 3;
+    public int maxHealth = 3;
+    [HideInInspector] public int currentHealth;
     public float moveSpeed = 3f;
     public float maxMoveSpeed = 5f;
     
+    [Header("Jumping")]
+    public float jumpForce = 12f;
+    public float coyoteTime = 0.1f;
+    private float coyoteCounter;
+    private bool canJump = true;
+    
+    [Header("AI Difficulty (0-1 scale for 5 levels)")]
+    [Range(0f, 1f)] public float aggressionLevel = 0.3f;    // How aggressive the AI is
+    [Range(0f, 1f)] public float parrySkill = 0.2f;        // Chance to successfully parry
+    [Range(0f, 1f)] public float aimAccuracy = 0.5f;       // Shooting accuracy
+    [Range(0f, 1f)] public float reactionSpeed = 0.4f;     // How fast AI reacts
+    [Range(0f, 1f)] public float obstacleNavigation = 0.6f; // How well it navigates obstacles
+    
     [Header("AI Behavior")]
-    public float aggressionLevel = 0.7f;    // 0 = defensive, 1 = very aggressive
-    public float reactionTime = 0.3f;       // How fast AI reacts to threats
-    public float preferredDistance = 4f;    // Ideal distance from player
-    public float retreatDistance = 2f;      // Distance to start retreating
-    public float circleRadius = 3f;         // Radius for circling behavior
+    public float preferredDistance = 4f;
+    public float retreatDistance = 2f;
+    public float visionRange = 8f;
     
     [Header("Combat")]
     public GameObject orbPrefab;
     public Transform orbSpawnPoint;
-    public float fireRate = 1.5f;
-    public float aimAccuracy = 0.8f;        // 0 = terrible aim, 1 = perfect aim
+    public float fireRate = 2f;
     public float parryRange = 1.5f;
     public float parryDuration = 0.3f;
-    public float dangerDetectionRange = 3f; // How far to look for incoming orbs
+    public float dangerDetectionRange = 3f;
     private bool isParrying = false;
     private float lastShotTime = 0f;
     
     [Header("Target")]
     public Transform player;
     
-    [Header("Ground Check")]
+    [Header("Ground & Obstacle Detection")]
     public Transform groundCheck;
+    public Transform frontCheck;    // Check for walls/obstacles ahead
+    public Transform ledgeCheck;    // Check for ledges/drops
     public float groundCheckRadius = 0.2f;
+    public float frontCheckDistance = 0.8f;
+    public float ledgeCheckDistance = 1f;
     public LayerMask groundLayer;
     private bool isGrounded;
+    private bool hitWall;
+    private bool nearLedge;
+    
+    [Header("Health Display")]
+    public Transform healthBarParent;
+    public GameObject healthPipPrefab;
+    private GameObject[] healthPips;
     
     [Header("Respawn")]
     public bool respawn = false;
@@ -51,10 +74,10 @@ public class EnemyController : MonoBehaviour
 
     // AI State
     private AIState currentState = AIState.Hunting;
-    private Vector2 targetPosition;
+    private Vector2 moveDirection = Vector2.right;
     private float stateTimer = 0f;
-    private float circleAngle = 0f;
     private PongOrb threatOrb = null;
+    private float nextReactionTime = 0f;
     
     // Components
     private Rigidbody2D rb;
@@ -65,34 +88,81 @@ public class EnemyController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         spawnPosition = transform.position;
+        currentHealth = maxHealth;
         
-        // Start with a random circle position
-        circleAngle = Random.Range(0f, 360f);
+        SetupHealthBar();
         
         StartCoroutine(AIBehaviorUpdate());
         StartCoroutine(CombatUpdate());
     }
 
+    void SetupHealthBar()
+    {
+        if (healthBarParent == null || healthPipPrefab == null) return;
+        
+        healthPips = new GameObject[maxHealth];
+        for (int i = 0; i < maxHealth; i++)
+        {
+            healthPips[i] = Instantiate(healthPipPrefab, healthBarParent);
+        }
+        UpdateHealthDisplay();
+    }
+
+    void UpdateHealthDisplay()
+    {
+        if (healthPips == null) return;
+        
+        for (int i = 0; i < healthPips.Length; i++)
+        {
+            if (healthPips[i] != null)
+                healthPips[i].SetActive(i < currentHealth);
+        }
+    }
+
     void FixedUpdate()
     {
-        CheckGrounded();
+        CheckEnvironment();
         UpdateAIState();
         ExecuteMovement();
         UpdateVisuals();
     }
     
-    void CheckGrounded()
+    void CheckEnvironment()
     {
-        if (groundCheck != null)
-            isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        // Ground check
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        
+        // Coyote time for jumping
+        if (isGrounded)
+        {
+            coyoteCounter = coyoteTime;
+            canJump = true;
+        }
+        else
+        {
+            coyoteCounter -= Time.fixedDeltaTime;
+        }
+        
+        // Wall/obstacle check
+        Vector2 frontDirection = sr.flipX ? Vector2.left : Vector2.right;
+        hitWall = Physics2D.Raycast(frontCheck.position, frontDirection, frontCheckDistance, groundLayer);
+        
+        // Ledge check
+        Vector2 ledgeCheckPos = (Vector2)ledgeCheck.position + frontDirection * ledgeCheckDistance;
+        nearLedge = !Physics2D.OverlapCircle(ledgeCheckPos, groundCheckRadius, groundLayer);
     }
 
     IEnumerator AIBehaviorUpdate()
     {
         while (true)
         {
-            AnalyzeSituation();
-            yield return new WaitForSeconds(0.1f); // Update AI decisions 10 times per second
+            if (Time.time >= nextReactionTime)
+            {
+                AnalyzeSituation();
+                // Reaction speed affects how often AI makes decisions
+                nextReactionTime = Time.time + (1f - reactionSpeed) * 0.3f + 0.1f;
+            }
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
@@ -103,19 +173,19 @@ public class EnemyController : MonoBehaviour
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
         PongOrb nearestThreat = FindNearestThreatOrb();
         
-        // Priority 1: Dodge incoming orbs
-        if (nearestThreat != null && Vector2.Distance(transform.position, nearestThreat.transform.position) < dangerDetectionRange)
+        // Priority 1: Jump over obstacles
+        if ((hitWall || nearLedge) && isGrounded && obstacleNavigation > Random.Range(0f, 1f))
+        {
+            ChangeState(AIState.Jumping);
+        }
+        // Priority 2: Dodge incoming orbs
+        else if (nearestThreat != null && Vector2.Distance(transform.position, nearestThreat.transform.position) < dangerDetectionRange)
         {
             ChangeState(AIState.Dodging);
             threatOrb = nearestThreat;
         }
-        // Priority 2: Parry if orb is very close
-        else if (ShouldParry())
-        {
-            // Parrying is handled in CheckForOrbParry
-        }
-        // Priority 3: Retreat if too close and low health
-        else if (distanceToPlayer < retreatDistance && health <= 1)
+        // Priority 3: Retreat if low health and close
+        else if (distanceToPlayer < retreatDistance && currentHealth <= 1)
         {
             ChangeState(AIState.Retreating);
         }
@@ -124,8 +194,8 @@ public class EnemyController : MonoBehaviour
         {
             ChangeState(AIState.Attacking);
         }
-        // Priority 5: Circle around player to find good position
-        else if (distanceToPlayer > preferredDistance * 1.5f || Random.Range(0f, 1f) < 0.3f)
+        // Priority 5: Circle if too close but healthy
+        else if (distanceToPlayer < retreatDistance && Random.Range(0f, 1f) < aggressionLevel)
         {
             ChangeState(AIState.Circling);
         }
@@ -142,21 +212,6 @@ public class EnemyController : MonoBehaviour
         {
             currentState = newState;
             stateTimer = 0f;
-            
-            // State-specific initialization
-            switch (newState)
-            {
-                case AIState.Circling:
-                    // Pick a new circle angle
-                    circleAngle += Random.Range(45f, 180f);
-                    break;
-                    
-                case AIState.Retreating:
-                    // Find retreat position opposite from player
-                    Vector2 retreatDir = (transform.position - player.position).normalized;
-                    targetPosition = (Vector2)transform.position + retreatDir * 3f;
-                    break;
-            }
         }
     }
 
@@ -185,56 +240,74 @@ public class EnemyController : MonoBehaviour
             case AIState.Dodging:
                 DodgeOrb();
                 break;
+                
+            case AIState.Jumping:
+                JumpObstacle();
+                break;
         }
     }
 
     void HuntPlayer()
     {
         if (player == null) return;
-        targetPosition = player.position;
+        
+        // Move towards player
+        Vector2 dirToPlayer = (player.position - transform.position).normalized;
+        moveDirection = new Vector2(dirToPlayer.x, 0f);
     }
 
     void AttackPlayer()
     {
         if (player == null) return;
         
-        // Stay at preferred distance while attacking
+        // Move slowly to maintain distance while shooting
         Vector2 dirToPlayer = (player.position - transform.position).normalized;
-        targetPosition = (Vector2)player.position - dirToPlayer * preferredDistance;
+        float currentDistance = Vector2.Distance(transform.position, player.position);
         
-        // Add some randomness to make it less predictable
-        Vector2 randomOffset = new Vector2(
-            Random.Range(-1f, 1f) * (1f - aggressionLevel),
-            Random.Range(-0.5f, 0.5f) * (1f - aggressionLevel)
-        );
-        targetPosition += randomOffset;
+        if (currentDistance < preferredDistance)
+        {
+            moveDirection = new Vector2(-dirToPlayer.x * 0.5f, 0f); // Back away slowly
+        }
+        else if (currentDistance > preferredDistance * 1.2f)
+        {
+            moveDirection = new Vector2(dirToPlayer.x * 0.5f, 0f); // Move closer slowly
+        }
+        else
+        {
+            moveDirection = Vector2.zero; // Stay in position
+        }
     }
 
     void Retreat()
     {
-        // Already set targetPosition in ChangeState
-        // Add some vertical movement to avoid being predictable
-        if (stateTimer > 1f)
-        {
-            targetPosition.y += Random.Range(-1f, 1f);
-        }
+        if (player == null) return;
+        
+        // Move away from player
+        Vector2 dirFromPlayer = (transform.position - player.position).normalized;
+        moveDirection = new Vector2(dirFromPlayer.x, 0f);
     }
 
     void CirclePlayer()
     {
         if (player == null) return;
         
-        // Update circle angle
-        float circleSpeed = 30f * (aggressionLevel + 0.5f); // More aggressive = faster circling
-        circleAngle += circleSpeed * Time.fixedDeltaTime;
+        // Strafe around player
+        Vector2 dirToPlayer = (player.position - transform.position).normalized;
+        Vector2 perpendicular = new Vector2(-dirToPlayer.y, dirToPlayer.x);
         
-        // Calculate circle position
-        Vector2 playerPos = player.position;
-        float radians = circleAngle * Mathf.Deg2Rad;
-        targetPosition = playerPos + new Vector2(
-            Mathf.Cos(radians) * circleRadius,
-            Mathf.Sin(radians) * circleRadius * 0.5f // Flatten vertically
-        );
+        // Randomly choose left or right strafing
+        if (stateTimer < 0.1f)
+        {
+            perpendicular *= Random.Range(0f, 1f) > 0.5f ? 1f : -1f;
+        }
+        
+        moveDirection = new Vector2(perpendicular.x, 0f);
+        
+        // Change direction after a while
+        if (stateTimer > Random.Range(1f, 3f))
+        {
+            ChangeState(AIState.Hunting);
+        }
     }
 
     void DodgeOrb()
@@ -245,17 +318,17 @@ public class EnemyController : MonoBehaviour
             return;
         }
         
-        // Calculate dodge direction perpendicular to orb's path
-        Vector2 orbVelocity = threatOrb.GetDirection();
-        Vector2 perpendicular = new Vector2(-orbVelocity.y, orbVelocity.x);
+        // Move away from the orb
+        Vector2 dirFromOrb = (transform.position - threatOrb.transform.position).normalized;
+        moveDirection = new Vector2(dirFromOrb.x, 0f);
         
-        // Choose dodge direction based on which side is safer
-        float rightSide = Vector2.Dot(perpendicular, Vector2.right);
-        if (rightSide < 0) perpendicular = -perpendicular;
+        // Jump if orb is coming horizontally
+        if (Mathf.Abs(threatOrb.GetDirection().x) > 0.5f && isGrounded && Random.Range(0f, 1f) < obstacleNavigation)
+        {
+            Jump();
+        }
         
-        targetPosition = (Vector2)transform.position + perpendicular * 2f;
-        
-        // Stop dodging if orb is far away or destroyed
+        // Stop dodging if orb is far away
         if (Vector2.Distance(transform.position, threatOrb.transform.position) > dangerDetectionRange)
         {
             threatOrb = null;
@@ -263,37 +336,63 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    void JumpObstacle()
+    {
+        // Jump and continue moving forward
+        if (canJump && coyoteCounter > 0f)
+        {
+            Jump();
+        }
+        
+        // Continue moving in the same direction
+        Vector2 dirToPlayer = player != null ? (player.position - transform.position).normalized : Vector2.right;
+        moveDirection = new Vector2(dirToPlayer.x, 0f);
+        
+        // Return to hunting after jump
+        if (stateTimer > 1f)
+        {
+            ChangeState(AIState.Hunting);
+        }
+    }
+
+    void Jump()
+    {
+        if (canJump && coyoteCounter > 0f)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            canJump = false;
+            coyoteCounter = 0f;
+        }
+    }
+
     void ExecuteMovement()
     {
-        Vector2 currentPos = rb.position;
-        Vector2 moveDirection = (targetPosition - currentPos).normalized;
+        // Apply horizontal movement
+        float targetVelocityX = moveDirection.x * moveSpeed;
         
-        // Adjust speed based on state
-        float currentMoveSpeed = moveSpeed;
+        // Speed modifications based on state
         switch (currentState)
         {
             case AIState.Dodging:
-                currentMoveSpeed = maxMoveSpeed;
-                break;
-            case AIState.Retreating:
-                currentMoveSpeed = moveSpeed * 1.2f;
+                targetVelocityX *= 1.5f; // Move faster when dodging
                 break;
             case AIState.Attacking:
-                currentMoveSpeed = moveSpeed * 0.8f; // Slower when attacking for accuracy
+                targetVelocityX *= 0.6f; // Move slower when attacking
+                break;
+            case AIState.Retreating:
+                targetVelocityX *= 1.2f; // Move faster when retreating
                 break;
         }
         
-        // Apply movement
-        Vector2 newPosition = currentPos + moveDirection * currentMoveSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(newPosition);
+        rb.linearVelocity = new Vector2(targetVelocityX, rb.linearVelocity.y);
     }
 
     void UpdateVisuals()
     {
         // Flip sprite based on movement direction
-        if (player != null)
+        if (Mathf.Abs(moveDirection.x) > 0.1f)
         {
-            sr.flipX = player.position.x < transform.position.x;
+            sr.flipX = moveDirection.x < 0f;
         }
     }
 
@@ -303,7 +402,7 @@ public class EnemyController : MonoBehaviour
         {
             CheckForOrbParry();
             TryShoot();
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.15f);
         }
     }
 
@@ -312,16 +411,14 @@ public class EnemyController : MonoBehaviour
         if (Time.time < lastShotTime + fireRate) return;
         if (player == null || orbPrefab == null || orbSpawnPoint == null) return;
         if (currentState != AIState.Attacking && currentState != AIState.Hunting) return;
-        
-        // Only shoot if we have a reasonable shot
         if (!CanSeePlayer()) return;
         
         Vector2 targetPoint = PredictPlayerPosition();
         Vector2 shootDir = (targetPoint - (Vector2)orbSpawnPoint.position).normalized;
         
         // Add inaccuracy based on aimAccuracy
-        float inaccuracy = (1f - aimAccuracy) * 30f; // Up to 30 degrees of error
-        float angleError = Random.Range(-inaccuracy, inaccuracy);
+        float maxError = (1f - aimAccuracy) * 45f; // Up to 45 degrees of error
+        float angleError = Random.Range(-maxError, maxError);
         float angle = Mathf.Atan2(shootDir.y, shootDir.x) * Mathf.Rad2Deg + angleError;
         shootDir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
         
@@ -333,19 +430,17 @@ public class EnemyController : MonoBehaviour
         orbScript.SetDirection(shootDir);
         
         lastShotTime = Time.time;
-        Debug.Log(name + " shot orb at player!");
     }
 
     Vector2 PredictPlayerPosition()
     {
         if (player == null) return Vector2.zero;
         
-        // Try to predict where player will be
         Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
-        if (playerRb != null)
+        if (playerRb != null && aimAccuracy > 0.3f)
         {
-            float predictionTime = Vector2.Distance(transform.position, player.position) / 8f; // Assuming orb speed of 8
-            return (Vector2)player.position + playerRb.linearVelocity * predictionTime;
+            float predictionTime = Vector2.Distance(transform.position, player.position) / 8f;
+            return (Vector2)player.position + playerRb.linearVelocity * predictionTime * aimAccuracy;
         }
         
         return player.position;
@@ -355,13 +450,13 @@ public class EnemyController : MonoBehaviour
     {
         if (player == null) return false;
         
-        // Simple line of sight check
-        Vector2 dirToPlayer = (player.position - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToPlayer, 
-                                           Vector2.Distance(transform.position, player.position), 
-                                           groundLayer);
+        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+        if (distanceToPlayer > visionRange) return false;
         
-        return hit.collider == null; // No obstacles in the way
+        Vector2 dirToPlayer = (player.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToPlayer, distanceToPlayer, groundLayer);
+        
+        return hit.collider == null;
     }
 
     PongOrb FindNearestThreatOrb()
@@ -372,16 +467,15 @@ public class EnemyController : MonoBehaviour
         
         foreach (PongOrb orb in orbs)
         {
-            if (orb.owner == gameObject) continue; // Ignore own orbs
+            if (orb.owner == gameObject) continue;
             
             float distance = Vector2.Distance(orb.transform.position, transform.position);
             if (distance < nearestDistance && distance < dangerDetectionRange)
             {
-                // Check if orb is moving towards us
                 Vector2 orbToUs = (transform.position - orb.transform.position).normalized;
                 float dot = Vector2.Dot(orb.GetDirection(), orbToUs);
                 
-                if (dot > 0.3f) // Orb is moving somewhat towards us
+                if (dot > 0.2f)
                 {
                     nearest = orb;
                     nearestDistance = distance;
@@ -395,7 +489,7 @@ public class EnemyController : MonoBehaviour
     void CheckForOrbParry()
     {
         if (isParrying) return;
-        if (!ShouldParry()) return;
+        if (Random.Range(0f, 1f) > parrySkill) return; // Parry skill check
 
         PongOrb[] orbs = FindObjectsOfType<PongOrb>();
         foreach (PongOrb orb in orbs)
@@ -411,21 +505,12 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    bool ShouldParry()
-    {
-        // More aggressive enemies parry more often
-        // Lower health enemies parry more often (desperation)
-        float parryChance = aggressionLevel + (1f - (float)health / 3f) * 0.3f;
-        return Random.Range(0f, 1f) < parryChance;
-    }
-
     IEnumerator ParryOrb(PongOrb orb)
     {
         isParrying = true;
-        Debug.Log(name + " is parrying!");
 
         orb.ReverseDirection();
-        orb.owner = gameObject; // Take ownership of parried orb
+        orb.owner = gameObject;
 
         yield return new WaitForSeconds(parryDuration);
         isParrying = false;
@@ -433,19 +518,19 @@ public class EnemyController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        health -= damage;
-        Debug.Log(name + " took " + damage + " damage. Health left: " + health);
+        currentHealth -= damage;
+        currentHealth = Mathf.Max(0, currentHealth);
+        UpdateHealthDisplay();
         
-        // Become more aggressive when hurt
-        aggressionLevel = Mathf.Min(1f, aggressionLevel + 0.2f);
+        // Get slightly more aggressive when hurt
+        aggressionLevel = Mathf.Min(1f, aggressionLevel + 0.1f);
         
-        if (health <= 0)
+        if (currentHealth <= 0)
             DieEnemy();
     }
 
     void DieEnemy()
     {
-        Debug.Log(name + " died!");
         StopAllCoroutines();
         gameObject.SetActive(false);
 
@@ -456,21 +541,17 @@ public class EnemyController : MonoBehaviour
     IEnumerator RespawnEnemy()
     {
         yield return new WaitForSeconds(respawnDelay);
-        health = 3;
-        aggressionLevel = 0.7f; // Reset aggression
+        currentHealth = maxHealth;
+        UpdateHealthDisplay();
         transform.position = spawnPosition;
         gameObject.SetActive(true);
         
-        // Restart coroutines
         StartCoroutine(AIBehaviorUpdate());
         StartCoroutine(CombatUpdate());
-        
-        Debug.Log(name + " respawned!");
     }
 
     void OnDrawGizmosSelected()
     {
-        // Draw detection ranges
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, parryRange);
         
@@ -478,12 +559,19 @@ public class EnemyController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, dangerDetectionRange);
         
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, preferredDistance);
+        Gizmos.DrawWireSphere(transform.position, visionRange);
         
         if (groundCheck != null)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+        
+        if (frontCheck != null)
+        {
+            Gizmos.color = Color.cyan;
+            Vector2 dir = sr != null && sr.flipX ? Vector2.left : Vector2.right;
+            Gizmos.DrawRay(frontCheck.position, dir * frontCheckDistance);
         }
     }
 }

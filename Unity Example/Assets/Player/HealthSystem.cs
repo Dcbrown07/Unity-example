@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -25,9 +26,20 @@ public class PlayerHealth : MonoBehaviour
     void Die()
     {
         Debug.Log("Player died!");
-        // Add respawn, game over, or animation logic here
+        
+        // Reset the current level after a short delay
+        Invoke("ResetLevel", 1f); // 1 second delay so player can see what happened
+        
         gameObject.SetActive(false);
     }
 
+    void ResetLevel()
+    {
+        // Reload the current scene to reset the level
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
     public int GetHealth() => currentHealth;
+    
+    public int GetMaxHealth() => maxHealth;
 }

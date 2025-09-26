@@ -167,27 +167,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4f400e0d23f8b445a8157a8826bd760, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCharacter
-  health: 3
+  maxHealth: 3
+  currentHealth: 0
   moveSpeed: 2
   maxMoveSpeed: 5
+  jumpForce: 12
+  coyoteTime: 0.1
   aggressionLevel: 0.3
-  reactionTime: 0.3
+  parrySkill: 0.2
+  aimAccuracy: 0.5
+  reactionSpeed: 0.4
+  obstacleNavigation: 0.6
   preferredDistance: 4
   retreatDistance: 2
-  circleRadius: 3
+  visionRange: 8
   orbPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
   orbSpawnPoint: {fileID: 5746890766586388080}
   fireRate: 2
-  aimAccuracy: 0.5
   parryRange: 1.5
   parryDuration: 0.3
   dangerDetectionRange: 3
   player: {fileID: 0}
   groundCheck: {fileID: 7908837500026356185}
+  frontCheck: {fileID: 5626610743011603093}
+  ledgeCheck: {fileID: 7615779802511320218}
   groundCheckRadius: 0.2
+  frontCheckDistance: 0.8
+  ledgeCheckDistance: 1
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  healthBarParent: {fileID: 0}
+  healthPipPrefab: {fileID: 0}
   respawn: 0
   respawnDelay: 3
 --- !u!61 &2467039173106822800
