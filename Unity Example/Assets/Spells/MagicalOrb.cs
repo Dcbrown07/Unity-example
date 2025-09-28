@@ -33,6 +33,9 @@ public class PongOrb : MonoBehaviour
         {
             usePhysics = false;
         }
+        
+        // Set initial rotation and flip
+        UpdateVisuals();
     }
 
     void Update()
@@ -50,6 +53,25 @@ public class PongOrb : MonoBehaviour
                 direction = rb.linearVelocity.normalized;
             }
         }
+        
+        // Update visuals every frame to match direction
+        UpdateVisuals();
+    }
+
+    void UpdateVisuals()
+    {
+        if (direction.magnitude > 0.1f)
+        {
+            // Calculate rotation angle from direction
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            
+            // Flip sprite if moving left (angle between 90 and 270 degrees)
+            if (sr != null)
+            {
+                sr.flipY = angle > 90f || angle < -90f;
+            }
+        }
     }
 
     // Public API the rest of your code expects
@@ -62,6 +84,8 @@ public class PongOrb : MonoBehaviour
         {
             rb.linearVelocity = direction * speed;
         }
+        
+        UpdateVisuals();
     }
 
     public Vector2 GetDirection()
@@ -77,6 +101,8 @@ public class PongOrb : MonoBehaviour
         {
             rb.linearVelocity = direction * speed;
         }
+        
+        UpdateVisuals();
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -133,6 +159,9 @@ public class PongOrb : MonoBehaviour
             {
                 rb.linearVelocity = direction * speed;
             }
+
+            // Update visuals after bounce
+            UpdateVisuals();
 
             // change orb type/color on bounce (optional)
             ToggleType();
