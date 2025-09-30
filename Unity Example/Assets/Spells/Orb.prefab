@@ -136,6 +136,10 @@ MonoBehaviour:
   currentType: 0
   owner: {fileID: 0}
   lifetime: 15
+  bounceSfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
+  hitEnemySfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
+  hitPlayerSfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
+  parrySfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
 --- !u!60 &5277652419605204738
 PolygonCollider2D:
   m_ObjectHideFlags: 0

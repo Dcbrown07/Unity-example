@@ -3,6 +3,7 @@ using System.Collections;
 
 public enum AIState
 {
+    Patrolling,   // Searching for player when not in sight
     Hunting,      // Moving to attack position
     Attacking,    // Actively shooting at player
     Retreating,   // Moving away from danger
@@ -26,16 +27,17 @@ public class EnemyController : MonoBehaviour
     private bool canJump = true;
     
     [Header("AI Difficulty (0-1 scale for 5 levels)")]
-    [Range(0f, 1f)] public float aggressionLevel = 0.3f;    // How aggressive the AI is
-    [Range(0f, 1f)] public float parrySkill = 0.2f;        // Chance to successfully parry
-    [Range(0f, 1f)] public float aimAccuracy = 0.5f;       // Shooting accuracy
-    [Range(0f, 1f)] public float reactionSpeed = 0.4f;     // How fast AI reacts
-    [Range(0f, 1f)] public float obstacleNavigation = 0.6f; // How well it navigates obstacles
+    [Range(0f, 1f)] public float aggressionLevel = 0.3f;
+    [Range(0f, 1f)] public float parrySkill = 0.2f;
+    [Range(0f, 1f)] public float aimAccuracy = 0.5f;
+    [Range(0f, 1f)] public float reactionSpeed = 0.4f;
+    [Range(0f, 1f)] public float obstacleNavigation = 0.6f;
     
     [Header("AI Behavior")]
     public float preferredDistance = 4f;
     public float retreatDistance = 2f;
     public float visionRange = 8f;
+    public float patrolRange = 6f;
     
     [Header("Combat")]
     public GameObject orbPrefab;
@@ -52,8 +54,8 @@ public class EnemyController : MonoBehaviour
     
     [Header("Ground & Obstacle Detection")]
     public Transform groundCheck;
-    public Transform frontCheck;    // Check for walls/obstacles ahead
-    public Transform ledgeCheck;    // Check for ledges/drops
+    public Transform frontCheck;
+    public Transform ledgeCheck;
     public float groundCheckRadius = 0.2f;
     public float frontCheckDistance = 0.8f;
     public float ledgeCheckDistance = 1f;
@@ -73,11 +75,16 @@ public class EnemyController : MonoBehaviour
     private Vector3 spawnPosition;
 
     // AI State
-    private AIState currentState = AIState.Hunting;
+    private AIState currentState = AIState.Patrolling;
+    private Vector2 targetPosition;
     private Vector2 moveDirection = Vector2.right;
     private float stateTimer = 0f;
     private PongOrb threatOrb = null;
     private float nextReactionTime = 0f;
+    private bool playerInSight = false;
+    private Vector2 lastKnownPlayerPosition;
+    private Vector2 patrolStartPosition;
+    private float patrolDirection = 1f;
     
     // Components
     private Rigidbody2D rb;
@@ -88,7 +95,10 @@ public class EnemyController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         spawnPosition = transform.position;
+        patrolStartPosition = transform.position;
         currentHealth = maxHealth;
+        
+        patrolDirection = Random.Range(0f, 1f) > 0.5f ? 1f : -1f;
         
         SetupHealthBar();
         
@@ -129,10 +139,8 @@ public class EnemyController : MonoBehaviour
     
     void CheckEnvironment()
     {
-        // Ground check
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
         
-        // Coyote time for jumping
         if (isGrounded)
         {
             coyoteCounter = coyoteTime;
@@ -143,11 +151,9 @@ public class EnemyController : MonoBehaviour
             coyoteCounter -= Time.fixedDeltaTime;
         }
         
-        // Wall/obstacle check
         Vector2 frontDirection = sr.flipX ? Vector2.left : Vector2.right;
         hitWall = Physics2D.Raycast(frontCheck.position, frontDirection, frontCheckDistance, groundLayer);
         
-        // Ledge check
         Vector2 ledgeCheckPos = (Vector2)ledgeCheck.position + frontDirection * ledgeCheckDistance;
         nearLedge = !Physics2D.OverlapCircle(ledgeCheckPos, groundCheckRadius, groundLayer);
     }
@@ -159,7 +165,6 @@ public class EnemyController : MonoBehaviour
             if (Time.time >= nextReactionTime)
             {
                 AnalyzeSituation();
-                // Reaction speed affects how often AI makes decisions
                 nextReactionTime = Time.time + (1f - reactionSpeed) * 0.3f + 0.1f;
             }
             yield return new WaitForSeconds(0.1f);
@@ -173,33 +178,38 @@ public class EnemyController : MonoBehaviour
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
         PongOrb nearestThreat = FindNearestThreatOrb();
         
-        // Priority 1: Jump over obstacles
+        playerInSight = CanSeePlayer() && distanceToPlayer <= visionRange;
+        
+        if (playerInSight)
+        {
+            lastKnownPlayerPosition = player.position;
+        }
+        
         if ((hitWall || nearLedge) && isGrounded && obstacleNavigation > Random.Range(0f, 1f))
         {
             ChangeState(AIState.Jumping);
         }
-        // Priority 2: Dodge incoming orbs
         else if (nearestThreat != null && Vector2.Distance(transform.position, nearestThreat.transform.position) < dangerDetectionRange)
         {
             ChangeState(AIState.Dodging);
             threatOrb = nearestThreat;
         }
-        // Priority 3: Retreat if low health and close
+        else if (!playerInSight)
+        {
+            ChangeState(AIState.Patrolling);
+        }
         else if (distanceToPlayer < retreatDistance && currentHealth <= 1)
         {
             ChangeState(AIState.Retreating);
         }
-        // Priority 4: Attack if in good position
-        else if (distanceToPlayer <= preferredDistance && distanceToPlayer > retreatDistance && CanSeePlayer())
+        else if (distanceToPlayer <= preferredDistance && distanceToPlayer > retreatDistance)
         {
             ChangeState(AIState.Attacking);
         }
-        // Priority 5: Circle if too close but healthy
-        else if (distanceToPlayer < retreatDistance && Random.Range(0f, 1f) < aggressionLevel)
+        else if (distanceToPlayer > preferredDistance * 1.5f || Random.Range(0f, 1f) < 0.3f)
         {
             ChangeState(AIState.Circling);
         }
-        // Default: Hunt the player
         else
         {
             ChangeState(AIState.Hunting);
@@ -221,90 +231,116 @@ public class EnemyController : MonoBehaviour
         
         switch (currentState)
         {
+            case AIState.Patrolling:
+                PatrolForPlayer();
+                break;
             case AIState.Hunting:
                 HuntPlayer();
                 break;
-                
             case AIState.Attacking:
                 AttackPlayer();
                 break;
-                
             case AIState.Retreating:
                 Retreat();
                 break;
-                
             case AIState.Circling:
                 CirclePlayer();
                 break;
-                
             case AIState.Dodging:
                 DodgeOrb();
                 break;
-                
             case AIState.Jumping:
                 JumpObstacle();
                 break;
         }
     }
 
+    void PatrolForPlayer()
+    {
+        if (lastKnownPlayerPosition != Vector2.zero)
+        {
+            float distanceToLastKnown = Mathf.Abs(transform.position.x - lastKnownPlayerPosition.x);
+            
+            if (distanceToLastKnown > 1f)
+            {
+                targetPosition = new Vector2(lastKnownPlayerPosition.x, transform.position.y);
+                return;
+            }
+            else
+            {
+                lastKnownPlayerPosition = Vector2.zero;
+            }
+        }
+        
+        float distanceFromStart = transform.position.x - patrolStartPosition.x;
+        
+        if (Mathf.Abs(distanceFromStart) > patrolRange)
+        {
+            patrolDirection = -Mathf.Sign(distanceFromStart);
+        }
+        
+        if (Random.Range(0f, 1f) < 0.01f)
+        {
+            patrolDirection = -patrolDirection;
+        }
+        
+        targetPosition = new Vector2(transform.position.x + patrolDirection * 2f, transform.position.y);
+    }
+
     void HuntPlayer()
     {
         if (player == null) return;
-        
-        // Move towards player
-        Vector2 dirToPlayer = (player.position - transform.position).normalized;
-        moveDirection = new Vector2(dirToPlayer.x, 0f);
+        targetPosition = new Vector2(player.position.x, transform.position.y);
     }
 
     void AttackPlayer()
     {
         if (player == null) return;
         
-        // Move slowly to maintain distance while shooting
         Vector2 dirToPlayer = (player.position - transform.position).normalized;
         float currentDistance = Vector2.Distance(transform.position, player.position);
         
         if (currentDistance < preferredDistance)
         {
-            moveDirection = new Vector2(-dirToPlayer.x * 0.5f, 0f); // Back away slowly
+            moveDirection = new Vector2(-dirToPlayer.x * 0.5f, 0f);
         }
         else if (currentDistance > preferredDistance * 1.2f)
         {
-            moveDirection = new Vector2(dirToPlayer.x * 0.5f, 0f); // Move closer slowly
+            moveDirection = new Vector2(dirToPlayer.x * 0.5f, 0f);
         }
         else
         {
-            moveDirection = Vector2.zero; // Stay in position
+            moveDirection = Vector2.zero;
         }
+        
+        targetPosition = new Vector2(transform.position.x + moveDirection.x * 2f, transform.position.y);
     }
 
     void Retreat()
     {
         if (player == null) return;
         
-        // Move away from player
         Vector2 dirFromPlayer = (transform.position - player.position).normalized;
-        moveDirection = new Vector2(dirFromPlayer.x, 0f);
+        targetPosition = new Vector2(transform.position.x + dirFromPlayer.x * 3f, transform.position.y);
     }
 
     void CirclePlayer()
     {
         if (player == null) return;
         
-        // Strafe around player
-        Vector2 dirToPlayer = (player.position - transform.position).normalized;
-        Vector2 perpendicular = new Vector2(-dirToPlayer.y, dirToPlayer.x);
+        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
         
-        // Randomly choose left or right strafing
-        if (stateTimer < 0.1f)
+        if (distanceToPlayer < preferredDistance)
         {
-            perpendicular *= Random.Range(0f, 1f) > 0.5f ? 1f : -1f;
+            float direction = transform.position.x > player.position.x ? 1f : -1f;
+            targetPosition = new Vector2(transform.position.x + direction * 2f, transform.position.y);
+        }
+        else
+        {
+            targetPosition = new Vector2(player.position.x, transform.position.y);
         }
         
-        moveDirection = new Vector2(perpendicular.x, 0f);
-        
-        // Change direction after a while
-        if (stateTimer > Random.Range(1f, 3f))
+        if (stateTimer > Random.Range(2f, 4f))
         {
             ChangeState(AIState.Hunting);
         }
@@ -318,18 +354,15 @@ public class EnemyController : MonoBehaviour
             return;
         }
         
-        // Move away from the orb
-        Vector2 dirFromOrb = (transform.position - threatOrb.transform.position).normalized;
-        moveDirection = new Vector2(dirFromOrb.x, 0f);
+        float directionFromOrb = transform.position.x > threatOrb.transform.position.x ? 1f : -1f;
+        targetPosition = new Vector2(transform.position.x + directionFromOrb * 2f, transform.position.y);
         
-        // Jump if orb is coming horizontally
         if (Mathf.Abs(threatOrb.GetDirection().x) > 0.5f && isGrounded && Random.Range(0f, 1f) < obstacleNavigation)
         {
             Jump();
         }
         
-        // Stop dodging if orb is far away
-        if (Vector2.Distance(transform.position, threatOrb.transform.position) > dangerDetectionRange)
+        if (threatOrb == null || Vector2.Distance(transform.position, threatOrb.transform.position) > dangerDetectionRange)
         {
             threatOrb = null;
             ChangeState(AIState.Hunting);
@@ -338,17 +371,14 @@ public class EnemyController : MonoBehaviour
 
     void JumpObstacle()
     {
-        // Jump and continue moving forward
         if (canJump && coyoteCounter > 0f)
         {
             Jump();
         }
         
-        // Continue moving in the same direction
         Vector2 dirToPlayer = player != null ? (player.position - transform.position).normalized : Vector2.right;
-        moveDirection = new Vector2(dirToPlayer.x, 0f);
+        targetPosition = new Vector2(transform.position.x + dirToPlayer.x * 2f, transform.position.y);
         
-        // Return to hunting after jump
         if (stateTimer > 1f)
         {
             ChangeState(AIState.Hunting);
@@ -367,32 +397,38 @@ public class EnemyController : MonoBehaviour
 
     void ExecuteMovement()
     {
-        // Apply horizontal movement
-        float targetVelocityX = moveDirection.x * moveSpeed;
+        Vector2 currentPos = transform.position;
         
-        // Speed modifications based on state
+        float horizontalDirection = 0f;
+        float distanceToTarget = Mathf.Abs(targetPosition.x - currentPos.x);
+        
+        if (distanceToTarget > 0.5f)
+        {
+            horizontalDirection = targetPosition.x > currentPos.x ? 1f : -1f;
+        }
+        
+        float currentMoveSpeed = moveSpeed;
         switch (currentState)
         {
             case AIState.Dodging:
-                targetVelocityX *= 1.5f; // Move faster when dodging
-                break;
-            case AIState.Attacking:
-                targetVelocityX *= 0.6f; // Move slower when attacking
+                currentMoveSpeed = maxMoveSpeed;
                 break;
             case AIState.Retreating:
-                targetVelocityX *= 1.2f; // Move faster when retreating
+                currentMoveSpeed = moveSpeed * 1.2f;
+                break;
+            case AIState.Attacking:
+                currentMoveSpeed = moveSpeed * 0.8f;
                 break;
         }
         
-        rb.linearVelocity = new Vector2(targetVelocityX, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(horizontalDirection * currentMoveSpeed, rb.linearVelocity.y);
     }
 
     void UpdateVisuals()
     {
-        // Flip sprite based on movement direction
-        if (Mathf.Abs(moveDirection.x) > 0.1f)
+        if (rb.linearVelocity.x != 0)
         {
-            sr.flipX = moveDirection.x < 0f;
+            sr.flipX = rb.linearVelocity.x < 0f;
         }
     }
 
@@ -411,13 +447,12 @@ public class EnemyController : MonoBehaviour
         if (Time.time < lastShotTime + fireRate) return;
         if (player == null || orbPrefab == null || orbSpawnPoint == null) return;
         if (currentState != AIState.Attacking && currentState != AIState.Hunting) return;
-        if (!CanSeePlayer()) return;
+        if (!playerInSight) return;
         
         Vector2 targetPoint = PredictPlayerPosition();
         Vector2 shootDir = (targetPoint - (Vector2)orbSpawnPoint.position).normalized;
         
-        // Add inaccuracy based on aimAccuracy
-        float maxError = (1f - aimAccuracy) * 45f; // Up to 45 degrees of error
+        float maxError = (1f - aimAccuracy) * 45f;
         float angleError = Random.Range(-maxError, maxError);
         float angle = Mathf.Atan2(shootDir.y, shootDir.x) * Mathf.Rad2Deg + angleError;
         shootDir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
@@ -489,7 +524,7 @@ public class EnemyController : MonoBehaviour
     void CheckForOrbParry()
     {
         if (isParrying) return;
-        if (Random.Range(0f, 1f) > parrySkill) return; // Parry skill check
+        if (Random.Range(0f, 1f) > parrySkill) return;
 
         PongOrb[] orbs = FindObjectsOfType<PongOrb>();
         foreach (PongOrb orb in orbs)
@@ -508,12 +543,16 @@ public class EnemyController : MonoBehaviour
     IEnumerator ParryOrb(PongOrb orb)
     {
         isParrying = true;
-
         orb.ReverseDirection();
         orb.owner = gameObject;
-
         yield return new WaitForSeconds(parryDuration);
         isParrying = false;
+    }
+
+    void OnDisable()
+    {
+        Debug.Log("=== ENEMY DISABLED ===");
+        Debug.Log(gameObject.name + " was disabled. Current health: " + currentHealth);
     }
 
     public void TakeDamage(int damage)
@@ -522,20 +561,45 @@ public class EnemyController : MonoBehaviour
         currentHealth = Mathf.Max(0, currentHealth);
         UpdateHealthDisplay();
         
-        // Get slightly more aggressive when hurt
+        Debug.Log("=== ENEMY DAMAGE ===");
+        Debug.Log(gameObject.name + " took " + damage + " damage. Health left: " + currentHealth);
+        
         aggressionLevel = Mathf.Min(1f, aggressionLevel + 0.1f);
         
         if (currentHealth <= 0)
+        {
+            Debug.Log(gameObject.name + " health is 0 or below - calling DieEnemy()");
             DieEnemy();
+        }
+        else
+        {
+            Debug.Log(gameObject.name + " is still alive with " + currentHealth + " health");
+        }
     }
 
     void DieEnemy()
     {
+        Debug.Log("=== DIE ENEMY CALLED ===");
+        Debug.Log(gameObject.name + " died!");
+        
         StopAllCoroutines();
         gameObject.SetActive(false);
+        
+        if (LevelManager.Instance != null)
+        {
+            Debug.Log("LevelManager found! Calling EnemyDefeated()");
+            LevelManager.Instance.EnemyDefeated();
+        }
+        else
+        {
+            Debug.LogError("LevelManager.Instance is NULL! Can't notify level completion.");
+        }
 
         if (respawn)
+        {
+            Debug.Log("Enemy will respawn in " + respawnDelay + " seconds");
             StartCoroutine(RespawnEnemy());
+        }
     }
 
     IEnumerator RespawnEnemy()

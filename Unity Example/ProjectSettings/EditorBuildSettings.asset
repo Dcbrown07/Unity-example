@@ -6,8 +6,23 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Dylan.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
+    path: Assets/Scenes/Brady Level 1.unity
+    guid: ed8b4db84a2413a43b1c5145f84b9f1e
+  - enabled: 1
+    path: Assets/Scenes/Brady Level 2.unity
+    guid: 33e1064aefaeb6f449fca106a3a347ea
+  - enabled: 1
+    path: Assets/Scenes/Brady Level 3.unity
+    guid: 509773608e763ce49b9e37e9a1718598
+  - enabled: 1
+    path: Assets/Scenes/Brady Level 4.unity
+    guid: 2478df44534048f4b8e2328b613b63cf
+  - enabled: 1
+    path: Assets/Scenes/Brady Level 5.unity
+    guid: 7be4a62385cc72944bb24c170c740139
+  - enabled: 1
+    path: Assets/Scenes/Dylan End.unity
+    guid: 611367c34d14d4a4e970bc53004602ea
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: b93ec74e58be72f45bec274a35cd127e, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 6e65bcfacf6b52748be6b569e509c642, type: 3}
