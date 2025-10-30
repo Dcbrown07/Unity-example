@@ -352,6 +352,10 @@ PrefabInstance:
       propertyPath: scaleXStretch
       value: 1.1
       objectReference: {fileID: 0}
+    - target: {fileID: 553833880501904568, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: enableSquashStretch
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1625997583060852650, guid: d956319ef258e834990185570c7f8339, type: 3}
       propertyPath: m_CameraType
       value: 0
@@ -1024,6 +1028,10 @@ PrefabInstance:
       value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: visionRange
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
       propertyPath: respawnDelay
       value: 3
       objectReference: {fileID: 0}
@@ -1032,8 +1040,16 @@ PrefabInstance:
       value: 0.797
       objectReference: {fileID: 0}
     - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: ignoreVisionChecks
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: ledgeCheckDistance
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
       propertyPath: obstacleLayer.m_Bits
-      value: 4294967295
+      value: 128
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

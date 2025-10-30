@@ -53,10 +53,14 @@ public class EnemyController : MonoBehaviour
     public float parryDuration = 0.3f;
     public float dangerDetectionRange = 3f;
     private bool isParrying = false;
-    private float lastShotTime = -999f; // allow immediate first shot
+    private float lastShotTime = -999f;
 
     [Header("Target")]
     public Transform player;
+    
+    [Header("Debug")]
+    public bool showDebugLogs = true;
+    public bool ignoreVisionChecks = false; // TESTING: Set true to bypass vision system
 
     [Header("Ground & Obstacle Detection")]
     public Transform groundCheck;
@@ -87,7 +91,6 @@ public class EnemyController : MonoBehaviour
     private float minX = float.NegativeInfinity;
     private float maxX = float.PositiveInfinity;
 
-    // AI State
     private AIState currentState = AIState.Patrolling;
     private Vector2 targetPosition;
     private Vector2 moveDirection = Vector2.right;
@@ -99,7 +102,6 @@ public class EnemyController : MonoBehaviour
     private Vector2 patrolStartPosition;
     private float patrolDirection = 1f;
 
-    // Components
     private Rigidbody2D rb;
     private SpriteRenderer sr;
 
@@ -115,14 +117,31 @@ public class EnemyController : MonoBehaviour
 
         SetupHealthBar();
 
+        // AUTO-FIND PLAYER IF NOT ASSIGNED
+        if (player == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+                Debug.Log($"[{gameObject.name}] Auto-found player: {player.name}");
+            }
+            else
+            {
+                Debug.LogError($"[{gameObject.name}] NO PLAYER FOUND! Make sure player has 'Player' tag!");
+            }
+        }
+
         if (detectBoundsAtStart)
             ComputeAdaptiveBounds();
 
-        // ensure immediate firing possibility
         lastShotTime = Time.time - fireRate;
 
         StartCoroutine(AIBehaviorUpdate());
         StartCoroutine(CombatUpdate());
+        
+        if (showDebugLogs)
+            Debug.Log($"[{gameObject.name}] Enemy initialized. Player: {(player != null ? player.name : "NULL")}");
     }
 
     void SetupHealthBar()
@@ -210,18 +229,31 @@ public class EnemyController : MonoBehaviour
 
     void AnalyzeSituation()
     {
-        if (player == null) return;
+        if (player == null)
+        {
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.LogWarning($"[{gameObject.name}] Player is NULL in AnalyzeSituation!");
+            return;
+        }
 
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
         PongOrb nearestThreat = FindNearestThreatOrb();
 
-        playerInSight = CanSeePlayer() && distanceToPlayer <= visionRange;
+        // SIMPLIFIED VISION CHECK - just check distance first
+        bool canSeePlayer = CanSeePlayer();
+        playerInSight = canSeePlayer && distanceToPlayer <= visionRange;
+
+        if (showDebugLogs && Time.frameCount % 60 == 0) // Log every 60 frames
+        {
+            Debug.Log($"[{gameObject.name}] Distance: {distanceToPlayer:F2} | InSight: {playerInSight} | State: {currentState}");
+        }
 
         if (playerInSight)
         {
             lastKnownPlayerPosition = player.position;
         }
 
+        // State decision logic
         if ((hitWall || nearLedge) && isGrounded && obstacleNavigation > Random.Range(0f, 1f))
         {
             ChangeState(AIState.Jumping);
@@ -257,6 +289,8 @@ public class EnemyController : MonoBehaviour
     {
         if (currentState != newState)
         {
+            if (showDebugLogs)
+                Debug.Log($"[{gameObject.name}] State change: {currentState} -> {newState}");
             currentState = newState;
             stateTimer = 0f;
         }
@@ -394,7 +428,6 @@ public class EnemyController : MonoBehaviour
         float directionFromOrb = transform.position.x > threatOrb.transform.position.x ? 1f : -1f;
         targetPosition = new Vector2(transform.position.x + directionFromOrb * 2f, transform.position.y);
 
-        // Only jump when grounded and orb is approaching horizontally
         if (threatOrb != null && Mathf.Abs(threatOrb.GetDirection().x) > 0.5f && isGrounded && Random.Range(0f, 1f) < obstacleNavigation)
         {
             Jump();
@@ -406,7 +439,6 @@ public class EnemyController : MonoBehaviour
             ChangeState(AIState.Hunting);
         }
 
-        // After a short time, prefer hunting to avoid running off-edge
         if (stateTimer > 1.2f)
         {
             ChangeState(AIState.Hunting);
@@ -451,7 +483,6 @@ public class EnemyController : MonoBehaviour
         switch (currentState)
         {
             case AIState.Dodging:
-                // don't exceed maxMoveSpeed when dodging; prefer responsive but capped sprint
                 targetSpeed = Mathf.Min(maxMoveSpeed, moveSpeed * 1.6f);
                 break;
             case AIState.Retreating:
@@ -473,7 +504,6 @@ public class EnemyController : MonoBehaviour
 
         rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
 
-        // If adaptive bounds were computed, react if near them
         if (!float.IsInfinity(minX) && !float.IsInfinity(maxX))
         {
             float edgeThreshold = 0.15f + boundsPadding;
@@ -512,20 +542,56 @@ public class EnemyController : MonoBehaviour
 
     void TryShoot()
     {
-        // quick defensive checks
-        if (player == null || orbPrefab == null || orbSpawnPoint == null) return;
-
-        // allow shooting when in Hunting or Attacking state and the player is visible
-        if (currentState != AIState.Attacking && currentState != AIState.Hunting) return;
-
-        if (!playerInSight)
+        if (player == null)
         {
-            // still allow occasional shots at last known position when aggressive
-            if (aggressionLevel < 0.9f) return;
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.LogWarning($"[{gameObject.name}] TryShoot: Player is NULL!");
+            return;
+        }
+        
+        if (orbPrefab == null)
+        {
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.LogWarning($"[{gameObject.name}] TryShoot: orbPrefab is NULL!");
+            return;
+        }
+        
+        if (orbSpawnPoint == null)
+        {
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.LogWarning($"[{gameObject.name}] TryShoot: orbSpawnPoint is NULL!");
+            return;
         }
 
-        if (Time.time < lastShotTime + fireRate) return;
+        // RELAXED SHOOTING CONDITIONS - allow shooting in more states
+        bool canShootInState = (currentState == AIState.Attacking || 
+                                currentState == AIState.Hunting || 
+                                currentState == AIState.Circling);
+        
+        if (!canShootInState)
+        {
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.Log($"[{gameObject.name}] Not in shooting state. Current: {currentState}");
+            return;
+        }
 
+        // Relax vision requirement
+        if (!playerInSight && aggressionLevel < 0.5f)
+        {
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.Log($"[{gameObject.name}] Player not in sight and low aggression");
+            return;
+        }
+
+        float timeSinceLastShot = Time.time - lastShotTime;
+        if (timeSinceLastShot < fireRate)
+        {
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.Log($"[{gameObject.name}] On cooldown. Time since shot: {timeSinceLastShot:F2}/{fireRate}");
+            return;
+        }
+
+        // SHOOT!
         Vector2 targetPoint = PredictPlayerPosition();
         Vector2 shootDir = (targetPoint - (Vector2)orbSpawnPoint.position).normalized;
         if (shootDir == Vector2.zero) shootDir = (player.position - orbSpawnPoint.position).normalized;
@@ -546,6 +612,9 @@ public class EnemyController : MonoBehaviour
         }
 
         lastShotTime = Time.time;
+        
+        if (showDebugLogs)
+            Debug.Log($"[{gameObject.name}] SHOT ORB at {shootDir}");
     }
 
     Vector2 PredictPlayerPosition()
@@ -567,15 +636,38 @@ public class EnemyController : MonoBehaviour
         if (player == null) return false;
 
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
-        if (distanceToPlayer > visionRange) return false;
+        if (distanceToPlayer > visionRange)
+        {
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.Log($"[{gameObject.name}] Player too far: {distanceToPlayer:F2} > {visionRange}");
+            return false;
+        }
 
         Vector2 dirToPlayer = (player.position - transform.position).normalized;
-        // use obstacleLayer and groundLayer combined for occlusion
+        
+        // IMPORTANT FIX: Check if we even have layers set
+        if (groundLayer.value == 0 && obstacleLayer.value == 0)
+        {
+            // No occlusion layers set, just use distance
+            if (showDebugLogs && Time.frameCount % 100 == 0)
+                Debug.Log($"[{gameObject.name}] No layer masks set - can see player!");
+            return true;
+        }
+
         int occlusionMask = (groundLayer.value | obstacleLayer.value);
+        
+        // Raycast with slightly offset start position to avoid self-collision
+        Vector2 rayStart = (Vector2)transform.position + dirToPlayer * 0.1f;
+        RaycastHit2D hit = Physics2D.Raycast(rayStart, dirToPlayer, distanceToPlayer - 0.1f, occlusionMask);
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, dirToPlayer, distanceToPlayer, occlusionMask);
+        if (showDebugLogs && Time.frameCount % 100 == 0)
+        {
+            if (hit.collider != null)
+                Debug.Log($"[{gameObject.name}] Vision blocked by: {hit.collider.gameObject.name} (Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)})");
+            else
+                Debug.Log($"[{gameObject.name}] Clear line of sight to player!");
+        }
 
-        // if nothing hit, player is visible; if we hit the player itself consider visible
         if (hit.collider == null) return true;
         if (hit.collider.gameObject == player.gameObject) return true;
 
@@ -639,8 +731,7 @@ public class EnemyController : MonoBehaviour
 
     void OnDisable()
     {
-        Debug.Log("=== ENEMY DISABLED ===");
-        Debug.Log(gameObject.name + " was disabled. Current health: " + currentHealth);
+        Debug.Log($"[{gameObject.name}] DISABLED. Health: {currentHealth}");
     }
 
     public void TakeDamage(int damage)
@@ -649,43 +740,34 @@ public class EnemyController : MonoBehaviour
         currentHealth = Mathf.Max(0, currentHealth);
         UpdateHealthDisplay();
 
-        Debug.Log("=== ENEMY DAMAGE ===");
-        Debug.Log(gameObject.name + " took " + damage + " damage. Health left: " + currentHealth);
+        Debug.Log($"[{gameObject.name}] took {damage} damage. Health: {currentHealth}");
 
         aggressionLevel = Mathf.Min(1f, aggressionLevel + 0.1f);
 
         if (currentHealth <= 0)
         {
-            Debug.Log(gameObject.name + " health is 0 or below - calling DieEnemy()");
             DieEnemy();
-        }
-        else
-        {
-            Debug.Log(gameObject.name + " is still alive with " + currentHealth + " health");
         }
     }
 
     void DieEnemy()
     {
-        Debug.Log("=== DIE ENEMY CALLED ===");
-        Debug.Log(gameObject.name + " died!");
+        Debug.Log($"[{gameObject.name}] DIED!");
 
         StopAllCoroutines();
         gameObject.SetActive(false);
 
         if (LevelManager.Instance != null)
         {
-            Debug.Log("LevelManager found! Calling EnemyDefeated()");
             LevelManager.Instance.EnemyDefeated();
         }
         else
         {
-            Debug.LogError("LevelManager.Instance is NULL! Can't notify level completion.");
+            Debug.LogError("LevelManager.Instance is NULL!");
         }
 
         if (respawn)
         {
-            Debug.Log("Enemy will respawn in " + respawnDelay + " seconds");
             StartCoroutine(RespawnEnemy());
         }
     }
@@ -777,11 +859,11 @@ public class EnemyController : MonoBehaviour
             Gizmos.DrawRay(frontCheck.position, dir * frontCheckDistance);
         }
 
-        if (!float.IsInfinity(minX) && !float.IsInfinity(maxX))
-        {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawLine(new Vector3(minX, transform.position.y - 5f, 0f), new Vector3(minX, transform.position.y + 5f, 0f));
-            Gizmos.DrawLine(new Vector3(maxX, transform.position.y - 5f, 0f), new Vector3(maxX, transform.position.y + 5f, 0f));
+                if (!float.IsInfinity(minX) && !float.IsInfinity(maxX))
+                {
+                    Gizmos.color = Color.magenta;
+                    Gizmos.DrawLine(new Vector3(minX, transform.position.y - 5f, 0f), new Vector3(minX, transform.position.y + 5f, 0f));
+                    Gizmos.DrawLine(new Vector3(maxX, transform.position.y - 5f, 0f), new Vector3(maxX, transform.position.y + 5f, 0f));
+                }
+            }
         }
-    }
-}

@@ -171,6 +171,9 @@ MonoBehaviour:
   currentHealth: 0
   moveSpeed: 2
   maxMoveSpeed: 5
+  acceleration: 40
+  deceleration: 60
+  maxHorizontalSpeed: 5
   jumpForce: 12
   coyoteTime: 0.1
   aggressionLevel: 0.3
@@ -181,6 +184,7 @@ MonoBehaviour:
   preferredDistance: 4
   retreatDistance: 2
   visionRange: 8
+  patrolRange: 6
   orbPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
   orbSpawnPoint: {fileID: 5746890766586388080}
   fireRate: 2
@@ -188,6 +192,8 @@ MonoBehaviour:
   parryDuration: 0.3
   dangerDetectionRange: 3
   player: {fileID: 0}
+  showDebugLogs: 1
+  ignoreVisionChecks: 0
   groundCheck: {fileID: 7908837500026356185}
   frontCheck: {fileID: 5626610743011603093}
   ledgeCheck: {fileID: 7615779802511320218}
@@ -197,10 +203,15 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 0
   healthBarParent: {fileID: 0}
   healthPipPrefab: {fileID: 0}
   respawn: 0
   respawnDelay: 3
+  detectBoundsAtStart: 1
+  boundsPadding: 0.2
 --- !u!61 &2467039173106822800
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -271,13 +282,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5301337759651317845}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: -0.707, y: 0.309, z: 0}
+  m_LocalRotation: {x: 1, y: 0, z: 0, w: 0}
+  m_LocalPosition: {x: -1.245, y: 0.309, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2317501519128154450}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 180}
 --- !u!1 &7418265206510915272
 GameObject:
   m_ObjectHideFlags: 0
