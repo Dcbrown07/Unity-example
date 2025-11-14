@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Bundos.WaterSystem
 {
@@ -30,6 +31,10 @@ namespace Bundos.WaterSystem
         [Header("Particles")]
         public GameObject splashParticle;
 
+        [Header("Player Movement")]
+        public float downwardForce = 50f;
+        public string playerTag = "Player";
+
         [HideInInspector]
         Spring[] springs;
         MeshFilter meshFilter;
@@ -41,6 +46,9 @@ namespace Bundos.WaterSystem
         public int[] triangles;
         [HideInInspector]
         Vector2[] uvs;
+
+        // Track objects in water
+        private HashSet<Rigidbody2D> objectsInWater = new HashSet<Rigidbody2D>();
 
 
         private void Start()
@@ -138,6 +146,28 @@ namespace Bundos.WaterSystem
             UpdateSpringPositions();
             UpdateMeshVerticePositions();
             UpdateMesh();
+            HandlePlayerInput();
+        }
+
+        private void HandlePlayerInput()
+        {
+            // Check if S key is held down
+            if (Input.GetKey(KeyCode.S))
+            {
+                // Apply downward force to all objects in water
+                foreach (Rigidbody2D rb in objectsInWater)
+                {
+                    if (rb != null)
+                    {
+                        // Check if it's the player (try both tag and name)
+                        if (rb.CompareTag(playerTag) || rb.gameObject.name.Contains("Player"))
+                        {
+                            // Use velocity instead of force for more immediate response
+                            rb.linearVelocity += Vector2.down * downwardForce * Time.deltaTime;
+                        }
+                    }
+                }
+            }
         }
 
         private void UpdateMeshVerticePositions()
@@ -216,8 +246,10 @@ namespace Bundos.WaterSystem
             Rigidbody2D otherRigidbody = other.GetComponent<Rigidbody2D>();
             if (otherRigidbody != null)
             {
-                Vector2 contactPoint = other.ClosestPoint(transform.position);
+                // Add to tracking set
+                objectsInWater.Add(otherRigidbody);
 
+                Vector2 contactPoint = other.ClosestPoint(transform.position);
                 Ripple(contactPoint, false);
             }
         }
@@ -230,6 +262,9 @@ namespace Bundos.WaterSystem
             Rigidbody2D otherRigidbody = other.GetComponent<Rigidbody2D>();
             if (otherRigidbody != null)
             {
+                // Remove from tracking set
+                objectsInWater.Remove(otherRigidbody);
+
                 Vector2 contactPoint = other.ClosestPoint(transform.position);
                 Ripple(contactPoint, true);
             }
