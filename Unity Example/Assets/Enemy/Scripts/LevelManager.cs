@@ -1,31 +1,43 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+
+[System.Serializable]
+public class LevelData
+{
+    public string sceneName;
+    [Tooltip("Optional: Display name for UI")]
+    public string levelDisplayName;
+}
 
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
 
     [Header("Level Configuration")]
-    public int currentLevel = 1;
-    public int totalLevels = 5;
-
-    [Header("Level Win Conditions")]
-    public bool winByKillingEnemy = true;      // Win by defeating enemy
-    public bool winByReachingTrigger = false;  // Win by reaching exit trigger
+    [Tooltip("Add your level scenes here in order. Just click + to add more!")]
+    public List<LevelData> levels = new List<LevelData>();
     
-    [Header("Scene Names - Set these in Inspector")]
-    public string level1SceneName = "Level1";
-    public string level2SceneName = "Level2";
-    public string level3SceneName = "Level3";
-    public string level4SceneName = "Level4";
-    public string level5SceneName = "Level5";
-    public string victorySceneName = "Victory"; // Final victory scene (optional)
+    [Space(10)]
+    [Tooltip("Optional: Scene to load after completing all levels")]
+    public string victorySceneName = "Victory";
 
-    private bool levelComplete = false;
+    [Header("Win Conditions")]
+    public bool winByKillingEnemy = true;
+    public bool winByReachingTrigger = false;
+
+    [Header("Transition Settings")]
+    [Tooltip("Delay before loading next level after win")]
+    public float nextLevelDelay = 2f;
+
+    [Header("Debug Info (Read Only)")]
+    [SerializeField] private int currentLevelIndex = 0;
+    [SerializeField] private string currentSceneName;
+    [SerializeField] private bool levelComplete = false;
 
     void Awake()
     {
-        // Singleton pattern - keeps level manager across scenes
+        // Singleton pattern
         if (Instance == null)
         {
             Instance = this;
@@ -34,31 +46,42 @@ public class LevelManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
     }
 
     void Start()
     {
-        // Determine current level from active scene
-        string currentSceneName = SceneManager.GetActiveScene().name;
-        currentLevel = GetLevelFromSceneName(currentSceneName);
-        
-        Debug.Log("=== LEVEL MANAGER START ===");
-        Debug.Log("Current Scene: " + currentSceneName);
-        Debug.Log("Current Level: " + currentLevel);
-        Debug.Log("Win by Killing Enemy: " + winByKillingEnemy);
-        Debug.Log("Win by Reaching Trigger: " + winByReachingTrigger);
-        Debug.Log("========================");
+        UpdateCurrentLevel();
+        LogLevelInfo();
     }
 
-    int GetLevelFromSceneName(string sceneName)
+    void UpdateCurrentLevel()
     {
-        if (sceneName == level1SceneName) return 1;
-        if (sceneName == level2SceneName) return 2;
-        if (sceneName == level3SceneName) return 3;
-        if (sceneName == level4SceneName) return 4;
-        if (sceneName == level5SceneName) return 5;
-        return 1; // Default to level 1
+        currentSceneName = SceneManager.GetActiveScene().name;
+        
+        // Find which level we're on
+        for (int i = 0; i < levels.Count; i++)
+        {
+            if (levels[i].sceneName == currentSceneName)
+            {
+                currentLevelIndex = i;
+                return;
+            }
+        }
+        
+        // If scene not found in list, default to first level
+        Debug.LogWarning($"Scene '{currentSceneName}' not found in level list! Defaulting to first level.");
+        currentLevelIndex = 0;
+    }
+
+    void LogLevelInfo()
+    {
+        Debug.Log("=== LEVEL MANAGER ===");
+        Debug.Log($"Current Scene: {currentSceneName}");
+        Debug.Log($"Level {currentLevelIndex + 1} of {levels.Count}");
+        Debug.Log($"Win Conditions - Kill Enemy: {winByKillingEnemy} | Trigger: {winByReachingTrigger}");
+        Debug.Log("====================");
     }
 
     public void EnemyDefeated()
@@ -67,7 +90,7 @@ public class LevelManager : MonoBehaviour
         {
             levelComplete = true;
             Debug.Log("Enemy defeated! Level complete.");
-            Invoke("LoadNextLevel", 2f); // 2 second delay before loading next level
+            Invoke(nameof(LoadNextLevel), nextLevelDelay);
         }
     }
 
@@ -77,62 +100,81 @@ public class LevelManager : MonoBehaviour
         {
             levelComplete = true;
             Debug.Log("Exit trigger reached! Level complete.");
-            Invoke("LoadNextLevel", 1f); // 1 second delay
+            Invoke(nameof(LoadNextLevel), nextLevelDelay);
         }
     }
 
     void LoadNextLevel()
     {
-        if (currentLevel >= totalLevels)
+        // Check if this was the last level
+        if (currentLevelIndex >= levels.Count - 1)
         {
-            // Beat all levels - load victory scene or restart
             Debug.Log("All levels complete! You win!");
-            if (!string.IsNullOrEmpty(victorySceneName))
-            {
-                SceneManager.LoadScene(victorySceneName);
-            }
-            else
-            {
-                // No victory scene, restart from level 1
-                currentLevel = 1;
-                SceneManager.LoadScene(level1SceneName);
-            }
+            LoadVictoryOrRestart();
         }
         else
         {
             // Load next level
-            currentLevel++;
-            string nextSceneName = GetSceneNameForLevel(currentLevel);
-            Debug.Log("Loading next level: " + nextSceneName);
-            SceneManager.LoadScene(nextSceneName);
-            levelComplete = false; // Reset for next level
+            currentLevelIndex++;
+            string nextScene = levels[currentLevelIndex].sceneName;
+            Debug.Log($"Loading Level {currentLevelIndex + 1}: {nextScene}");
+            SceneManager.LoadScene(nextScene);
+            levelComplete = false;
         }
     }
 
-    string GetSceneNameForLevel(int level)
+    void LoadVictoryOrRestart()
     {
-        switch (level)
+        if (!string.IsNullOrEmpty(victorySceneName))
         {
-            case 1: return level1SceneName;
-            case 2: return level2SceneName;
-            case 3: return level3SceneName;
-            case 4: return level4SceneName;
-            case 5: return level5SceneName;
-            default: return level1SceneName;
+            SceneManager.LoadScene(victorySceneName);
+        }
+        else
+        {
+            // No victory scene set, restart from beginning
+            RestartFromBeginning();
         }
     }
 
     public void RestartCurrentLevel()
     {
         levelComplete = false;
-        string currentSceneName = GetSceneNameForLevel(currentLevel);
-        SceneManager.LoadScene(currentSceneName);
+        if (currentLevelIndex >= 0 && currentLevelIndex < levels.Count)
+        {
+            SceneManager.LoadScene(levels[currentLevelIndex].sceneName);
+        }
     }
 
-    public void RestartFromLevel1()
+    public void RestartFromBeginning()
     {
-        currentLevel = 1;
+        currentLevelIndex = 0;
         levelComplete = false;
-        SceneManager.LoadScene(level1SceneName);
+        if (levels.Count > 0)
+        {
+            SceneManager.LoadScene(levels[0].sceneName);
+        }
+        else
+        {
+            Debug.LogError("No levels configured in LevelManager!");
+        }
     }
+
+    public void LoadSpecificLevel(int levelIndex)
+    {
+        if (levelIndex >= 0 && levelIndex < levels.Count)
+        {
+            currentLevelIndex = levelIndex;
+            levelComplete = false;
+            SceneManager.LoadScene(levels[levelIndex].sceneName);
+        }
+        else
+        {
+            Debug.LogError($"Invalid level index: {levelIndex}");
+        }
+    }
+
+    // Utility methods
+    public int GetCurrentLevelNumber() => currentLevelIndex + 1;
+    public int GetTotalLevels() => levels.Count;
+    public string GetCurrentLevelName() => levels[currentLevelIndex].levelDisplayName;
 }

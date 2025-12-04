@@ -1,10 +1,22 @@
 fileFormatVersion: 2
-guid: 05b6e9ff710e51d4b9405a1749f5c2a1
+guid: bad9d7ee05ef9474ab3f6577e7c4d95b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7402796283787388479
-    second: Drip V4_0
+      213: -6601616120532540302
+    second: armor boss NEW_0
+  - first:
+      213: 4420616743055802996
+    second: armor boss NEW_1
+  - first:
+      213: -3586688902141995530
+    second: armor boss NEW_2
+  - first:
+      213: 8170324329266039974
+    second: armor boss NEW_3
+  - first:
+      213: 2353391190823041512
+    second: armor boss NEW_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +49,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,12 +58,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +87,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,13 +125,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Drip V4_0
+      name: armor boss NEW_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 0
-        width: 9
-        height: 17
+        x: 0
+        y: 255
+        width: 320
+        height: 63
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +140,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f36aab79ff30cb660800000000000000
-      internalID: 7402796283787388479
+      spriteID: 2746a208d195264a0800000000000000
+      internalID: -6601616120532540302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss NEW_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 191
+        width: 320
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4724cf1a18f295d30800000000000000
+      internalID: 4420616743055802996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss NEW_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 127
+        width: 320
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f59df35275893ec0800000000000000
+      internalID: -3586688902141995530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss NEW_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 63
+        width: 320
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ac42a170b2d26170800000000000000
+      internalID: 8170324329266039974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss NEW_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 257
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e97a8ab1dce8a020800000000000000
+      internalID: 2353391190823041512
       vertices: []
       indices: 
       edges: []
@@ -138,7 +238,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +248,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Drip V4_0: 7402796283787388479
+      armor boss NEW_0: -6601616120532540302
+      armor boss NEW_1: 4420616743055802996
+      armor boss NEW_2: -3586688902141995530
+      armor boss NEW_3: 8170324329266039974
+      armor boss NEW_4: 2353391190823041512
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,28 +1,22 @@
 fileFormatVersion: 2
-guid: 7c7093d1f426b73428a2f336fec70ddc
+guid: ff9f58b125a7887438e52e4454e35e71
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6418838510602330021
-    second: Kings Guard Movement Finished V2_0
+      213: 6956043349636785652
+    second: swamp_monster_whip_attack (1)_0
   - first:
-      213: 4500420532043741281
-    second: Kings Guard Movement Finished V2_1
+      213: 3553304885478382085
+    second: swamp_monster_whip_attack (1)_1
   - first:
-      213: -2722012009993329774
-    second: Kings Guard Movement Finished V2_2
+      213: 5743825912172460537
+    second: swamp_monster_whip_attack (1)_2
   - first:
-      213: 2594609771743279171
-    second: Kings Guard Movement Finished V2_3
+      213: -2989117980966105090
+    second: swamp_monster_whip_attack (1)_3
   - first:
-      213: -4464712537650495928
-    second: Kings Guard Movement Finished V2_4
-  - first:
-      213: 3311276021368257339
-    second: Kings Guard Movement Finished V2_5
-  - first:
-      213: -334575682184177572
-    second: Kings Guard Movement Finished V2_6
+      213: -5256046880740831954
+    second: swamp_monster_whip_attack (1)_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -114,17 +108,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Kings Guard Movement Finished V2_0
+      name: swamp_monster_whip_attack (1)_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 66
+        x: 5
+        y: 133
         width: 21
-        height: 30
+        height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -133,20 +140,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5af9c0fed9b441950800000000000000
-      internalID: 6418838510602330021
+      spriteID: 4f5a1516294d88060800000000000000
+      internalID: 6956043349636785652
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Kings Guard Movement Finished V2_1
+      name: swamp_monster_whip_attack (1)_1
       rect:
         serializedVersion: 2
-        x: 36
-        y: 66
+        x: 5
+        y: 101
         width: 21
-        height: 30
+        height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -155,20 +162,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 168775031a4b47e30800000000000000
-      internalID: 4500420532043741281
+      spriteID: 50a599597ffdf4130800000000000000
+      internalID: 3553304885478382085
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Kings Guard Movement Finished V2_2
+      name: swamp_monster_whip_attack (1)_2
       rect:
         serializedVersion: 2
-        x: 68
-        y: 66
+        x: 5
+        y: 69
         width: 21
-        height: 30
+        height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -177,20 +184,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 293200eaf78793ad0800000000000000
-      internalID: -2722012009993329774
+      spriteID: 9f939ba2c3b26bf40800000000000000
+      internalID: 5743825912172460537
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Kings Guard Movement Finished V2_3
+      name: swamp_monster_whip_attack (1)_3
       rect:
         serializedVersion: 2
-        x: 4
-        y: 34
+        x: 5
+        y: 37
         width: 21
-        height: 30
+        height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -199,20 +206,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 348f38f27d7e10420800000000000000
-      internalID: 2594609771743279171
+      spriteID: eff48c888058486d0800000000000000
+      internalID: -2989117980966105090
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Kings Guard Movement Finished V2_4
+      name: swamp_monster_whip_attack (1)_4
       rect:
         serializedVersion: 2
-        x: 36
-        y: 34
-        width: 21
-        height: 30
+        x: 5
+        y: 5
+        width: 27
+        height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -221,52 +228,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 84efb112a972a02c0800000000000000
-      internalID: -4464712537650495928
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Kings Guard Movement Finished V2_5
-      rect:
-        serializedVersion: 2
-        x: 68
-        y: 34
-        width: 21
-        height: 30
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b3b7cee5ff304fd20800000000000000
-      internalID: 3311276021368257339
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Kings Guard Movement Finished V2_6
-      rect:
-        serializedVersion: 2
-        x: 4
-        y: 2
-        width: 21
-        height: 30
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c589de090395b5bf0800000000000000
-      internalID: -334575682184177572
+      spriteID: e2d84aea535ce07b0800000000000000
+      internalID: -5256046880740831954
       vertices: []
       indices: 
       edges: []
@@ -285,13 +248,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Kings Guard Movement Finished V2_0: 6418838510602330021
-      Kings Guard Movement Finished V2_1: 4500420532043741281
-      Kings Guard Movement Finished V2_2: -2722012009993329774
-      Kings Guard Movement Finished V2_3: 2594609771743279171
-      Kings Guard Movement Finished V2_4: -4464712537650495928
-      Kings Guard Movement Finished V2_5: 3311276021368257339
-      Kings Guard Movement Finished V2_6: -334575682184177572
+      swamp_monster_whip_attack (1)_0: 6956043349636785652
+      swamp_monster_whip_attack (1)_1: 3553304885478382085
+      swamp_monster_whip_attack (1)_2: 5743825912172460537
+      swamp_monster_whip_attack (1)_3: -2989117980966105090
+      swamp_monster_whip_attack (1)_4: -5256046880740831954
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

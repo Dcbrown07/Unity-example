@@ -1,0 +1,754 @@
+fileFormatVersion: 2
+guid: fe462b85f003d834ab3c8acd95b20223
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8512023046061767041
+    second: armor boss updated glow and shuffle_0
+  - first:
+      213: 5365674186868911437
+    second: armor boss updated glow and shuffle_1
+  - first:
+      213: -7604059950130913997
+    second: armor boss updated glow and shuffle_2
+  - first:
+      213: 8410141585695347713
+    second: armor boss updated glow and shuffle_3
+  - first:
+      213: -6797319694577461355
+    second: armor boss updated glow and shuffle_4
+  - first:
+      213: 454086564939085626
+    second: armor boss updated glow and shuffle_5
+  - first:
+      213: 3608633768354923307
+    second: armor boss updated glow and shuffle_6
+  - first:
+      213: -1937160920766037070
+    second: armor boss updated glow and shuffle_7
+  - first:
+      213: 3091307783224533243
+    second: armor boss updated glow and shuffle_8
+  - first:
+      213: -1615598261880549267
+    second: armor boss updated glow and shuffle_9
+  - first:
+      213: 7996366184520200021
+    second: armor boss updated glow and shuffle_10
+  - first:
+      213: -6057451276253935570
+    second: armor boss updated glow and shuffle_11
+  - first:
+      213: -122167228956434932
+    second: armor boss updated glow and shuffle_12
+  - first:
+      213: -2770714832471565392
+    second: armor boss updated glow and shuffle_13
+  - first:
+      213: -6875733080113629843
+    second: armor boss updated glow and shuffle_14
+  - first:
+      213: 1619398036192451198
+    second: armor boss updated glow and shuffle_15
+  - first:
+      213: 2853337247991110344
+    second: armor boss updated glow and shuffle_16
+  - first:
+      213: 6463995065755459082
+    second: armor boss updated glow and shuffle_17
+  - first:
+      213: 537178514280856999
+    second: armor boss updated glow and shuffle_18
+  - first:
+      213: 6801620534274325949
+    second: armor boss updated glow and shuffle_19
+  - first:
+      213: 2551838029207944211
+    second: armor boss updated glow and shuffle_20
+  - first:
+      213: 686247892662261883
+    second: armor boss updated glow and shuffle_21
+  - first:
+      213: 5533559811553156355
+    second: armor boss updated glow and shuffle_22
+  - first:
+      213: 8318427143880123094
+    second: armor boss updated glow and shuffle_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 8
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 95
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 189337c9cd7c02670800000000000000
+      internalID: 8512023046061767041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_1
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 127
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4dedc09e34b67a40800000000000000
+      internalID: 5365674186868911437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_2
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 127
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33d1cad63c3f87690800000000000000
+      internalID: -7604059950130913997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_3
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 95
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1049c1e9633d6b470800000000000000
+      internalID: 8410141585695347713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_4
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 127
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59791f360c11ba1a0800000000000000
+      internalID: -6797319694577461355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_5
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 95
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a37b870335d3d4600800000000000000
+      internalID: 454086564939085626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_6
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 127
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b23464ffa41741230800000000000000
+      internalID: 3608633768354923307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_7
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 95
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b3c8f4f762dd15e0800000000000000
+      internalID: -1937160920766037070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_8
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 127
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf0af76ec0886ea20800000000000000
+      internalID: 3091307783224533243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_9
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 95
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d601fdcc0fd3499e0800000000000000
+      internalID: -1615598261880549267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_10
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 31
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55fa542adacc8fe60800000000000000
+      internalID: 7996366184520200021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_11
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 63
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e28c5a2782c9feba0800000000000000
+      internalID: -6057451276253935570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_12
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 31
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0e9bd27d89fd4ef0800000000000000
+      internalID: -122167228956434932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_13
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 63
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bb50ac2a817c89d0800000000000000
+      internalID: -2770714832471565392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_14
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 31
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d65bc6d513d7490a0800000000000000
+      internalID: -6875733080113629843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_15
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 63
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7a57391fe1497610800000000000000
+      internalID: 1619398036192451198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_16
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 31
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ca96e20c17199720800000000000000
+      internalID: 2853337247991110344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_17
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 63
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0e5b3cb349b4b950800000000000000
+      internalID: 6463995065755459082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_18
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 31
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7adbeac3301747700800000000000000
+      internalID: 537178514280856999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_19
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 63
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbd7c62e6d5346e50800000000000000
+      internalID: 6801620534274325949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 29
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31cb547da23f96320800000000000000
+      internalID: 2551838029207944211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_21
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b789efd82da068900800000000000000
+      internalID: 686247892662261883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_22
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30dd00f94572bcc40800000000000000
+      internalID: 5533559811553156355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: armor boss updated glow and shuffle_23
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 0
+        width: 30
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d221f81a6df07370800000000000000
+      internalID: 8318427143880123094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      armor boss updated glow and shuffle_0: 8512023046061767041
+      armor boss updated glow and shuffle_1: 5365674186868911437
+      armor boss updated glow and shuffle_10: 7996366184520200021
+      armor boss updated glow and shuffle_11: -6057451276253935570
+      armor boss updated glow and shuffle_12: -122167228956434932
+      armor boss updated glow and shuffle_13: -2770714832471565392
+      armor boss updated glow and shuffle_14: -6875733080113629843
+      armor boss updated glow and shuffle_15: 1619398036192451198
+      armor boss updated glow and shuffle_16: 2853337247991110344
+      armor boss updated glow and shuffle_17: 6463995065755459082
+      armor boss updated glow and shuffle_18: 537178514280856999
+      armor boss updated glow and shuffle_19: 6801620534274325949
+      armor boss updated glow and shuffle_2: -7604059950130913997
+      armor boss updated glow and shuffle_20: 2551838029207944211
+      armor boss updated glow and shuffle_21: 686247892662261883
+      armor boss updated glow and shuffle_22: 5533559811553156355
+      armor boss updated glow and shuffle_23: 8318427143880123094
+      armor boss updated glow and shuffle_3: 8410141585695347713
+      armor boss updated glow and shuffle_4: -6797319694577461355
+      armor boss updated glow and shuffle_5: 454086564939085626
+      armor boss updated glow and shuffle_6: 3608633768354923307
+      armor boss updated glow and shuffle_7: -1937160920766037070
+      armor boss updated glow and shuffle_8: 3091307783224533243
+      armor boss updated glow and shuffle_9: -1615598261880549267
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

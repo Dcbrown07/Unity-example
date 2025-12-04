@@ -183,7 +183,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SimpleCameraFollow
   target: {fileID: 2864174771948869176}
   smoothSpeed: 0.125
-  offset: {x: 0, y: 1, z: -10}
+  offset: {x: 0, y: 2, z: 0}
+  cameraSize: 4
+  smoothZoom: 1
+  zoomSpeed: 5
+  useBounds: 0
+  minX: -10
+  maxX: 10
+  minY: -10
+  maxY: 10
+  showPreview: 1
+  showBounds: 1
 --- !u!1 &4202892009642581899
 GameObject:
   m_ObjectHideFlags: 0
@@ -488,6 +498,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24a2293cde129e843a16330737c339de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  cam: {fileID: 0}
   wand: {fileID: 5672256301309360033}
   wandSprite: {fileID: 4603390866278502707}
   fireballPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}

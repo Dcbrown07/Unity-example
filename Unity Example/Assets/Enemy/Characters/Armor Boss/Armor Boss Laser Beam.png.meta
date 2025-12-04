@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 05b6e9ff710e51d4b9405a1749f5c2a1
+guid: b429881e3db6c7b4f8b7e010495d669f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7402796283787388479
-    second: Drip V4_0
+      213: -7527979274307883577
+    second: Armor Boss Laser Beam_0
+  - first:
+      213: -1678780076138166376
+    second: Armor Boss Laser Beam_1
+  - first:
+      213: 5627139356160046607
+    second: Armor Boss Laser Beam_2
+  - first:
+      213: 1416100078436925598
+    second: Armor Boss Laser Beam_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +46,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,12 +55,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +84,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,13 +122,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Drip V4_0
+      name: Armor Boss Laser Beam_0
       rect:
         serializedVersion: 2
-        x: 12
+        x: 10
         y: 0
-        width: 9
-        height: 17
+        width: 12
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +137,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f36aab79ff30cb660800000000000000
-      internalID: 7402796283787388479
+      spriteID: 7cd20662cbe378790800000000000000
+      internalID: -7527979274307883577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Armor Boss Laser Beam_1
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 0
+        width: 12
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89708c15a66c3b8e0800000000000000
+      internalID: -1678780076138166376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Armor Boss Laser Beam_2
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 0
+        width: 12
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f063a893e6d971e40800000000000000
+      internalID: 5627139356160046607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Armor Boss Laser Beam_3
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 0
+        width: 12
+        height: 128
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e90c2adb48ff6a310800000000000000
+      internalID: 1416100078436925598
       vertices: []
       indices: 
       edges: []
@@ -138,7 +213,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +223,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Drip V4_0: 7402796283787388479
+      Armor Boss Laser Beam_0: -7527979274307883577
+      Armor Boss Laser Beam_1: -1678780076138166376
+      Armor Boss Laser Beam_2: 5627139356160046607
+      Armor Boss Laser Beam_3: 1416100078436925598
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

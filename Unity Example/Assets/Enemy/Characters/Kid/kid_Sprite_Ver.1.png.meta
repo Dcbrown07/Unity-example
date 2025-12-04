@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 05b6e9ff710e51d4b9405a1749f5c2a1
+guid: ae68e5a3901dcae46a299e681a6799ee
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7402796283787388479
-    second: Drip V4_0
+      213: -8303427727480920226
+    second: kid_Sprite_Ver.1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 12
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Drip V4_0
+      name: kid_Sprite_Ver.1_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 0
-        width: 9
-        height: 17
+        x: 10
+        y: 10
+        width: 14
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f36aab79ff30cb660800000000000000
-      internalID: 7402796283787388479
+      spriteID: e57ee5da97c44cc80800000000000000
+      internalID: -8303427727480920226
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Drip V4_0: 7402796283787388479
+      kid_Sprite_Ver.1_0: -8303427727480920226
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
