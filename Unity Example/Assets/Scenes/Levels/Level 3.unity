@@ -1877,6 +1877,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 4329393064971358885, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: cam
+      value: 
+      objectReference: {fileID: 1436786173}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1885,6 +1889,11 @@ PrefabInstance:
 --- !u!4 &1436786172 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2864174771948869176, guid: d956319ef258e834990185570c7f8339, type: 3}
+  m_PrefabInstance: {fileID: 1436786171}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &1436786173 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 2253337937879637401, guid: d956319ef258e834990185570c7f8339, type: 3}
   m_PrefabInstance: {fileID: 1436786171}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1482696980
