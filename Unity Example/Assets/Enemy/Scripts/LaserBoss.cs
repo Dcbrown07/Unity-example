@@ -17,17 +17,23 @@ public class LaserBoss : MonoBehaviour
     
     [Header("Laser Attacks")]
     public GameObject laserBeamPrefab; // Your laser sprite prefab
-    public Transform[] laserSpawnPoints; // Multiple points to spawn lasers from
+    public GameObject warningIndicatorPrefab; // Optional: visual warning line
+    public Transform laserSpawnPoint; // Single point to shoot from (like mouth/eye)
     public float laserAttackCooldown = 3f;
     public float laserWarningTime = 1f; // Time before laser activates
     public float laserActiveTime = 2f; // How long laser stays active
     public int laserDamage = 1;
+    public float laserWidth = 0.5f; // Width of the laser beam
+    public float laserLength = 15f; // Length of the laser beam
     
-    public enum AttackPattern { Horizontal, Vertical, Cross, Random }
+    public enum AttackPattern { TrackPlayer, Sweep, Cross, Spray }
     
     [Header("Attack Patterns")]
-    public AttackPattern currentPattern = AttackPattern.Horizontal;
+    public AttackPattern currentPattern = AttackPattern.TrackPlayer;
     public bool randomizePatterns = true;
+    
+    [Header("Player Tracking")]
+    public Transform player;
     
     [Header("Health")]
     public int maxHealth = 10;
@@ -52,6 +58,13 @@ public class LaserBoss : MonoBehaviour
         if (sprite == null) sprite = GetComponent<SpriteRenderer>();
         if (sprite != null) originalColor = sprite.color;
         if (animator == null) animator = GetComponent<Animator>();
+        
+        // Find player
+        if (player == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null) player = playerObj.transform;
+        }
         
         // Random starting direction
         moveDirection = Random.insideUnitCircle.normalized;
@@ -130,87 +143,106 @@ public class LaserBoss : MonoBehaviour
         if (randomizePatterns)
         {
             currentPattern = (AttackPattern)Random.Range(0, 4);
+            Debug.Log($"Randomly chose pattern: {currentPattern}");
         }
         
         Debug.Log($"Boss using {currentPattern} laser pattern!");
         
-        // Stop moving during attack
-        Vector3 attackPosition = transform.position;
-        
-        // Spawn lasers based on pattern
+        // Execute pattern
         switch (currentPattern)
         {
-            case AttackPattern.Horizontal:
-                SpawnHorizontalLasers();
+            case AttackPattern.TrackPlayer:
+                yield return StartCoroutine(TrackPlayerAttack());
                 break;
-            case AttackPattern.Vertical:
-                SpawnVerticalLasers();
+            case AttackPattern.Sweep:
+                yield return StartCoroutine(SweepAttack());
                 break;
             case AttackPattern.Cross:
-                SpawnCrossLasers();
+                yield return StartCoroutine(CrossAttack());
                 break;
-            case AttackPattern.Random:
-                SpawnRandomLasers();
+            case AttackPattern.Spray:
+                yield return StartCoroutine(SprayAttack());
                 break;
         }
-        
-        // Wait for attack to finish
-        yield return new WaitForSeconds(laserWarningTime + laserActiveTime);
         
         // Reset attack cooldown
         nextLaserAttack = Time.time + laserAttackCooldown;
         isAttacking = false;
     }
     
-    void SpawnHorizontalLasers()
+    IEnumerator TrackPlayerAttack()
     {
-        // Spawn 3 horizontal lasers at different Y positions
-        for (int i = 0; i < 3; i++)
-        {
-            float yPos = minY + ((maxY - minY) / 4f) * (i + 1);
-            SpawnLaser(new Vector3(0, yPos, 0), Vector3.zero, new Vector3(maxX - minX, 0.5f, 1));
-        }
+        if (player == null) yield break;
+        
+        // Aim at player
+        Vector2 spawnPos = laserSpawnPoint != null ? laserSpawnPoint.position : transform.position;
+        Vector2 direction = (player.position - (Vector3)spawnPos).normalized;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        
+        // Offset spawn position away from boss in the direction of the laser
+        Vector2 offset = direction * 2f; // Move 2 units away from boss
+        spawnPos += offset;
+        
+        SpawnLaser(spawnPos, angle, laserLength, laserWidth);
+        
+        yield return new WaitForSeconds(laserWarningTime + laserActiveTime);
     }
     
-    void SpawnVerticalLasers()
+    IEnumerator SweepAttack()
     {
-        // Spawn 3 vertical lasers at different X positions
-        for (int i = 0; i < 3; i++)
-        {
-            float xPos = minX + ((maxX - minX) / 4f) * (i + 1);
-            SpawnLaser(new Vector3(xPos, (minY + maxY) / 2f, 0), new Vector3(0, 0, 90), new Vector3(maxY - minY, 0.5f, 1));
-        }
-    }
-    
-    void SpawnCrossLasers()
-    {
-        // Horizontal laser
-        SpawnLaser(new Vector3(0, (minY + maxY) / 2f, 0), Vector3.zero, new Vector3(maxX - minX, 0.5f, 1));
-        // Vertical laser
-        SpawnLaser(new Vector3(0, (minY + maxY) / 2f, 0), new Vector3(0, 0, 90), new Vector3(maxY - minY, 0.5f, 1));
-    }
-    
-    void SpawnRandomLasers()
-    {
-        // Spawn 5 random lasers
+        // Sweep from left to right
         for (int i = 0; i < 5; i++)
         {
-            bool isHorizontal = Random.value > 0.5f;
+            Vector2 spawnPos = laserSpawnPoint != null ? laserSpawnPoint.position : transform.position;
+            float angle = -60f + (i * 30f); // -60 to 60 degrees
             
-            if (isHorizontal)
-            {
-                float yPos = Random.Range(minY, maxY);
-                SpawnLaser(new Vector3(0, yPos, 0), Vector3.zero, new Vector3(maxX - minX, 0.5f, 1));
-            }
-            else
-            {
-                float xPos = Random.Range(minX, maxX);
-                SpawnLaser(new Vector3(xPos, (minY + maxY) / 2f, 0), new Vector3(0, 0, 90), new Vector3(maxY - minY, 0.5f, 1));
-            }
+            // Offset spawn position
+            Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            spawnPos += direction * 2f;
+            
+            SpawnLaser(spawnPos, angle, laserLength, laserWidth);
+            yield return new WaitForSeconds(0.3f);
         }
+        
+        yield return new WaitForSeconds(laserWarningTime + laserActiveTime);
     }
     
-    void SpawnLaser(Vector3 position, Vector3 rotation, Vector3 scale)
+    IEnumerator CrossAttack()
+    {
+        Vector2 spawnPos = laserSpawnPoint != null ? laserSpawnPoint.position : transform.position;
+        
+        // Horizontal (right)
+        SpawnLaser(spawnPos + Vector2.right * 2f, 0f, laserLength, laserWidth);
+        // Horizontal (left)
+        SpawnLaser(spawnPos + Vector2.left * 2f, 180f, laserLength, laserWidth);
+        // Vertical (down)
+        SpawnLaser(spawnPos + Vector2.down * 2f, -90f, laserLength, laserWidth);
+        // Vertical (up)
+        SpawnLaser(spawnPos + Vector2.up * 2f, 90f, laserLength, laserWidth);
+        
+        yield return new WaitForSeconds(laserWarningTime + laserActiveTime);
+    }
+    
+    IEnumerator SprayAttack()
+    {
+        // Rapid fire in random directions
+        for (int i = 0; i < 8; i++)
+        {
+            Vector2 spawnPos = laserSpawnPoint != null ? laserSpawnPoint.position : transform.position;
+            float angle = Random.Range(0f, 360f);
+            
+            // Offset spawn position
+            Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            spawnPos += direction * 2f;
+            
+            SpawnLaser(spawnPos, angle, laserLength, laserWidth);
+            yield return new WaitForSeconds(0.2f);
+        }
+        
+        yield return new WaitForSeconds(laserWarningTime + laserActiveTime);
+    }
+    
+    void SpawnLaser(Vector2 position, float angleDegrees, float length, float width)
     {
         if (laserBeamPrefab == null)
         {
@@ -218,8 +250,8 @@ public class LaserBoss : MonoBehaviour
             return;
         }
         
-        GameObject laser = Instantiate(laserBeamPrefab, position, Quaternion.Euler(rotation));
-        laser.transform.localScale = scale;
+        GameObject laser = Instantiate(laserBeamPrefab, position, Quaternion.Euler(0, 0, angleDegrees));
+        laser.transform.localScale = new Vector3(length, width, 1);
         
         LaserBeam laserScript = laser.GetComponent<LaserBeam>();
         if (laserScript != null)
@@ -227,6 +259,7 @@ public class LaserBoss : MonoBehaviour
             laserScript.warningTime = laserWarningTime;
             laserScript.activeTime = laserActiveTime;
             laserScript.damage = laserDamage;
+            laserScript.boss = gameObject; // Pass boss reference
         }
     }
     
@@ -274,5 +307,12 @@ public class LaserBoss : MonoBehaviour
         Gizmos.DrawLine(bottomRight, topRight);
         Gizmos.DrawLine(topRight, topLeft);
         Gizmos.DrawLine(topLeft, bottomLeft);
+        
+        // Draw laser spawn point
+        if (laserSpawnPoint != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(laserSpawnPoint.position, 0.3f);
+        }
     }
 }

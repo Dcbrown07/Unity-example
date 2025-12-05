@@ -8,10 +8,16 @@ public class LaserBeam : MonoBehaviour
     public float activeTime = 2f;
     public int damage = 1;
     public float damageCooldown = 0.5f;
+    public GameObject boss; // Reference to the boss that spawned this laser
     
     [Header("Visual Colors")]
-    public Color warningColor = new Color(1f, 1f, 0f, 0.5f); // Yellow transparent
-    public Color activeColor = new Color(1f, 0f, 0f, 1f); // Red solid
+    public Color warningColor = new Color(1f, 1f, 0f, 0.3f); // Yellow transparent
+    public Color activeColor = new Color(1f, 0f, 0f, 0.8f); // Red semi-transparent
+    
+    [Header("Animation")]
+    public Animator animator;
+    public string warningAnimationTrigger = "Warning";
+    public string activeAnimationTrigger = "Active";
     
     private SpriteRenderer sprite;
     private BoxCollider2D laserCollider;
@@ -22,6 +28,7 @@ public class LaserBeam : MonoBehaviour
     {
         sprite = GetComponent<SpriteRenderer>();
         laserCollider = GetComponent<BoxCollider2D>();
+        animator = GetComponent<Animator>();
         
         if (sprite == null)
         {
@@ -34,12 +41,26 @@ public class LaserBeam : MonoBehaviour
             laserCollider.isTrigger = true;
         }
         
+        // Set collider to match the laser beam size
+        laserCollider.size = new Vector2(1f, 1f);
+        laserCollider.offset = Vector2.zero; // Centered on the laser sprite
+        
+        // Ignore collision with boss
+        if (boss != null)
+        {
+            Collider2D bossCollider = boss.GetComponent<Collider2D>();
+            if (bossCollider != null)
+            {
+                Physics2D.IgnoreCollision(laserCollider, bossCollider, true);
+            }
+        }
+        
         StartCoroutine(LaserSequence());
     }
     
     IEnumerator LaserSequence()
     {
-        // WARNING PHASE - Yellow, no damage
+        // WARNING PHASE - Yellow, no damage, pulsing
         if (sprite != null)
         {
             sprite.color = warningColor;
@@ -50,8 +71,26 @@ public class LaserBeam : MonoBehaviour
             laserCollider.enabled = false; // No collision during warning
         }
         
-        Debug.Log("Laser warning!");
-        yield return new WaitForSeconds(warningTime);
+        // Trigger warning animation if animator exists
+        if (animator != null && !string.IsNullOrEmpty(warningAnimationTrigger))
+        {
+            animator.SetTrigger(warningAnimationTrigger);
+        }
+        
+        // Pulsing warning effect
+        float elapsedTime = 0f;
+        while (elapsedTime < warningTime)
+        {
+            if (sprite != null)
+            {
+                float pulse = Mathf.PingPong(Time.time * 3f, 1f);
+                sprite.color = Color.Lerp(warningColor, new Color(1f, 0.5f, 0f, 0.5f), pulse);
+            }
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        
+        Debug.Log("Laser warning complete!");
         
         // ACTIVE PHASE - Red, deals damage
         if (sprite != null)
@@ -62,6 +101,12 @@ public class LaserBeam : MonoBehaviour
         if (laserCollider != null)
         {
             laserCollider.enabled = true; // Enable collision
+        }
+        
+        // Trigger active animation if animator exists
+        if (animator != null && !string.IsNullOrEmpty(activeAnimationTrigger))
+        {
+            animator.SetTrigger(activeAnimationTrigger);
         }
         
         isActive = true;
@@ -89,6 +134,32 @@ public class LaserBeam : MonoBehaviour
                     Debug.Log($"Laser hit player for {damage} damage!");
                 }
             }
+        }
+    }
+    
+    void OnDrawGizmos()
+    {
+        // Draw the laser hitbox in editor AND in play mode
+        if (laserCollider != null)
+        {
+            Gizmos.color = isActive ? Color.red : Color.yellow;
+            Gizmos.matrix = transform.localToWorldMatrix;
+            Gizmos.DrawWireCube(laserCollider.offset, laserCollider.size);
+            
+            // Also draw a filled version so it's visible
+            Gizmos.color = isActive ? new Color(1, 0, 0, 0.3f) : new Color(1, 1, 0, 0.3f);
+            Gizmos.DrawCube(laserCollider.offset, laserCollider.size);
+        }
+    }
+    
+    void OnDrawGizmosSelected()
+    {
+        // Draw even more detail when selected
+        if (laserCollider != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.matrix = transform.localToWorldMatrix;
+            Gizmos.DrawWireCube(laserCollider.offset, laserCollider.size);
         }
     }
 }

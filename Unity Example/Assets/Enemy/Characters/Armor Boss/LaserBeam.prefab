@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 804315222965447334}
   - component: {fileID: 3502470245111363694}
   - component: {fileID: 2788951241535882512}
+  - component: {fileID: 8831825183383747511}
   m_Layer: 0
   m_Name: LaserBeam
   m_TagString: Untagged
@@ -109,3 +110,28 @@ MonoBehaviour:
   damageCooldown: 0.5
   warningColor: {r: 1, g: 1, b: 0, a: 0.5}
   activeColor: {r: 1, g: 0, b: 0, a: 1}
+  animator: {fileID: 0}
+  warningAnimationTrigger: Warning
+  activeAnimationTrigger: Active
+--- !u!95 &8831825183383747511
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6871191924407393492}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5195f7d8f30d1b6408579dea6afdd1a6, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
