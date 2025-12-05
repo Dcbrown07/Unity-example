@@ -9,8 +9,18 @@ public class PlayerCombat2D : MonoBehaviour
     public SpriteRenderer wandSprite; // For flipping
     public GameObject fireballPrefab; // Fireball prefab
 
+    [Header("Wand Settings")]
+    [Tooltip("Does the player start with the wand?")]
+    public bool hasWand = false;
+    
+    [Tooltip("Show wand visuals when available")]
+    public bool showWandVisuals = true;
+
     [Header("Fireball Settings")]
     public float fireballForce = 10f;
+    
+    [Tooltip("Mana cost per fireball")]
+    public float manaCostPerShot = 20f;
 
     [Header("Wand Orbit Settings")]
     public float wandDistance = 1.5f;      // Distance from player
@@ -25,6 +35,7 @@ public class PlayerCombat2D : MonoBehaviour
     private bool isParrying = false;
 
     private float currentAngle = 0f; // Current wand angle around player
+    private PlayerMana manaSystem;
 
     void Start()
     {
@@ -41,16 +52,37 @@ public class PlayerCombat2D : MonoBehaviour
         {
             Debug.LogError("Camera not assigned in PlayerCombat2D! Please assign it in the prefab.");
         }
+
+        // Get mana system
+        manaSystem = GetComponent<PlayerMana>();
+        if (manaSystem == null)
+        {
+            Debug.LogWarning("PlayerMana component not found! Shooting will have no mana cost.");
+        }
+
+        // Set initial wand state
+        UpdateWandVisibility();
     }
 
     void Update()
     {
-        HandleWandOrbit();
-        HandleShooting();
+        if (hasWand)
+        {
+            HandleWandOrbit();
+            HandleShooting();
+        }
 
         if (Input.GetMouseButtonDown(1))
         {
             StartCoroutine(Parry());
+        }
+    }
+
+    void UpdateWandVisibility()
+    {
+        if (wand != null)
+        {
+            wand.gameObject.SetActive(hasWand && showWandVisuals);
         }
     }
 
@@ -94,9 +126,17 @@ public class PlayerCombat2D : MonoBehaviour
 
     void HandleShooting()
     {
+        if (!hasWand) return; // Can't shoot without wand
+
         if (Input.GetMouseButtonDown(0))
         {
             if (fireballPrefab == null || wand == null || cam == null) return;
+
+            // CHECK MANA FIRST
+            if (manaSystem != null && !manaSystem.UseMana(manaCostPerShot))
+            {
+                return; // Not enough mana, don't shoot
+            }
 
             Vector3 mouseScreenPos = Input.mousePosition;
             Vector3 screenCenter = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
@@ -118,6 +158,22 @@ public class PlayerCombat2D : MonoBehaviour
                 rb.AddForce(shootDirection * fireballForce, ForceMode2D.Impulse);
             }
         }
+    }
+
+    // Public method to give player the wand
+    public void GiveWand()
+    {
+        hasWand = true;
+        UpdateWandVisibility();
+        Debug.Log("Player obtained the wand!");
+    }
+
+    // Public method to remove wand
+    public void RemoveWand()
+    {
+        hasWand = false;
+        UpdateWandVisibility();
+        Debug.Log("Player lost the wand!");
     }
 
     void SetupFireballCollisions(GameObject fireball)

@@ -4206,7 +4206,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2317501519128154450, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.61
+      value: -5.36
       objectReference: {fileID: 0}
     - target: {fileID: 2317501519128154450, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4243,6 +4243,18 @@ PrefabInstance:
     - target: {fileID: 2317501519128154450, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5438629569782714495, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: canJump
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5438629569782714495, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: enemyType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5438629569782714495, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
+      propertyPath: movementType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7176019973706128780, guid: 957039ef2db52b74e90e2159a2c0df21, type: 3}
       propertyPath: player

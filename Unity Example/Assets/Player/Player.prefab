@@ -211,6 +211,7 @@ GameObject:
   - component: {fileID: 3182118541241127025}
   - component: {fileID: 6980943678482996010}
   - component: {fileID: 2994518636426514963}
+  - component: {fileID: 5796864870690604440}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -498,11 +499,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24a2293cde129e843a16330737c339de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  cam: {fileID: 0}
+  cam: {fileID: 2253337937879637401}
   wand: {fileID: 5672256301309360033}
   wandSprite: {fileID: 4603390866278502707}
   fireballPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
+  hasWand: 1
+  showWandVisuals: 1
   fireballForce: 10
+  manaCostPerShot: 20
   wandDistance: 1
   orbitSpeed: 8
   collisionMask:
@@ -523,6 +527,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   maxHealth: 5
+  currentHealth: 0
+  invincibilityDuration: 1
+  flashSpeed: 0.1
+  spriteRenderer: {fileID: 1671195669145660529}
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageFlashDuration: 0.2
+  healthBarParent: {fileID: 0}
+  healthPipPrefab: {fileID: 0}
+  deathDelay: 1.5
+  useLevelManager: 1
+  enableDeathAnimation: 1
+  deathJumpForce: 10
+  deathFreezeTime: 0.5
+  damageSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  healSound: {fileID: 0}
+  showDebugLogs: 1
 --- !u!70 &6980943678482996010
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -582,6 +603,36 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5796864870690604440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4202892009642581899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c0afa54925b3f14da1cc3d08a4256a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMana
+  maxMana: 100
+  startingMana: 100
+  manaRegenRate: 10
+  regenDelay: 1
+  lowManaThreshold: 0.3
+  enableLowManaPulse: 1
+  pulseSpeed: 3
+  lowManaColor: {r: 0.3, g: 0.3, b: 1, a: 1}
+  manaBar: {fileID: 0}
+  manaText: {fileID: 0}
+  manaBarFill: {fileID: 0}
+  outOfManaColor: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.2
+  playerSprite: {fileID: 1671195669145660529}
+  wandSprite: {fileID: 4603390866278502707}
+  maxGlowIntensity: 1.5
+  outOfManaSound: {fileID: 0}
+  lowManaWarningSound: {fileID: 0}
 --- !u!1 &4643864467780023090
 GameObject:
   m_ObjectHideFlags: 0

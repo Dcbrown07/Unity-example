@@ -31,16 +31,65 @@ public class SimpleEnemyAI : MonoBehaviour
     [Tooltip("How far the enemy can see the player")]
     public float detectionRange = 10f;
 
+    [Header("Attack Settings")]
+    [Tooltip("Damage dealt to player per attack")]
+    public int attackDamage = 1;
+    
+    [Tooltip("Time between attacks")]
+    public float attackCooldown = 1.5f;
+    
+    [Tooltip("Point where sword/weapon is (create empty child at sword tip)")]
+    public Transform attackPoint;
+    
+    [Tooltip("How far the attack reaches")]
+    public float attackRange = 2f;
+    
+    [Tooltip("Layer(s) that can be hit")]
+    public LayerMask playerLayer;
+
+    [Header("Attack Timing")]
+    [Tooltip("Delay before damage is dealt (sync with animation)")]
+    public float attackDelay = 0.3f;
+
+    [Header("Hit Feedback")]
+    [Tooltip("Color to flash player on hit")]
+    public Color hitFlashColor = Color.red;
+    
+    [Tooltip("How long to flash")]
+    public float hitFlashDuration = 0.2f;
+    
+    [Tooltip("Show debug text when hit lands")]
+    public bool showHitText = true;
+
     [Header("Visuals")]
     public SpriteRenderer spriteRenderer;
     public bool flipSpriteToFacePlayer = true;
+    
+    [Tooltip("Delay before turning to face player (lower = harder to flank)")]
+    [Range(0f, 3f)]
+    public float turnDelay = 1f;
+    
+    [Tooltip("Only turn when player moves significantly (harder to flank when still)")]
+    public bool requireMovementToTurn = true;
+    
+    [Tooltip("Distance player must move to trigger turn")]
+    public float movementThreshold = 0.5f;
+    
+    private float lastTurnTime = 0f;
+    private bool isFacingRight = true;
+    private Vector2 lastPlayerPosition;
 
     [Header("Debug")]
     public bool showGizmos = true;
+    public bool showAttackDebug = true;
 
     private bool isAttacking = false;
     private float distanceToPlayer;
     private bool isGrounded = false;
+    private float lastAttackTime = -999f;
+    private bool isDealingDamage = false;
+    private Vector2 lastAttackRayStart;
+    private Vector2 lastAttackRayEnd;
 
     void Start()
     {
@@ -79,8 +128,20 @@ public class SimpleEnemyAI : MonoBehaviour
         // Setup Rigidbody2D for proper ground walking
         if (rb != null)
         {
-            rb.gravityScale = 1f; // Enable gravity
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation; // Prevent rotation
+            rb.gravityScale = 1f;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        }
+
+        // Initialize facing direction
+        if (spriteRenderer != null)
+        {
+            isFacingRight = spriteRenderer.flipX; // Match current sprite orientation
+        }
+
+        // Initialize last player position
+        if (player != null)
+        {
+            lastPlayerPosition = player.position;
         }
     }
 
@@ -96,12 +157,19 @@ public class SimpleEnemyAI : MonoBehaviour
 
         distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
+        // DEBUG: Always show distance
+        if (Time.frameCount % 30 == 0) // Every 30 frames
+        {
+            Debug.Log($"Distance to player: {distanceToPlayer:F2} | Attack Distance: {attackDistance}");
+        }
+
         // Check if player is in detection range
         if (distanceToPlayer <= detectionRange)
         {
             // Check if close enough to attack
             if (distanceToPlayer <= attackDistance)
             {
+                Debug.Log($"<color=magenta>IN ATTACK RANGE! Distance: {distanceToPlayer:F2}</color>");
                 Attack();
             }
             // Close enough to stop but not attack yet
@@ -121,16 +189,30 @@ public class SimpleEnemyAI : MonoBehaviour
             Idle();
         }
 
-        // Flip sprite to face player
-        if (flipSpriteToFacePlayer && spriteRenderer != null)
+        // Flip sprite to face player (with delay and movement check)
+        if (flipSpriteToFacePlayer && spriteRenderer != null && player != null)
         {
-            if (player.position.x < transform.position.x)
+            bool shouldFaceRight = player.position.x > transform.position.x;
+            
+            // Check if player has moved enough to trigger turn
+            bool playerMoved = true;
+            if (requireMovementToTurn)
             {
-                spriteRenderer.flipX = true;
+                float distanceMoved = Vector2.Distance(player.position, lastPlayerPosition);
+                playerMoved = distanceMoved >= movementThreshold;
+                
+                if (playerMoved)
+                {
+                    lastPlayerPosition = player.position;
+                }
             }
-            else
+            
+            // Only turn if enough time has passed AND player moved
+            if (shouldFaceRight != isFacingRight && Time.time >= lastTurnTime + turnDelay && playerMoved)
             {
-                spriteRenderer.flipX = false;
+                isFacingRight = shouldFaceRight;
+                spriteRenderer.flipX = shouldFaceRight;
+                lastTurnTime = Time.time;
             }
         }
     }
@@ -174,20 +256,168 @@ public class SimpleEnemyAI : MonoBehaviour
 
     void Attack()
     {
-        isAttacking = true;
-
         // Stop horizontal movement when attacking
         if (rb != null)
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
         }
 
-        // Set animator to attacking
-        if (animator != null)
+        // Check if we can attack (cooldown)
+        if (Time.time >= lastAttackTime + attackCooldown)
         {
-            animator.SetBool("isWalking", false);
-            animator.SetBool("isAttacking", true);
+            isAttacking = true;
+            lastAttackTime = Time.time;
+
+            Debug.Log($"<color=cyan>ENEMY ATTACKING! Time: {Time.time}</color>");
+
+            // Set animator to attacking
+            if (animator != null)
+            {
+                animator.SetBool("isWalking", false);
+                animator.SetBool("isAttacking", true);
+            }
+
+            // Deal damage after delay (to sync with animation)
+            if (!isDealingDamage)
+            {
+                Debug.Log($"<color=magenta>Starting damage coroutine with delay: {attackDelay}s</color>");
+                StartCoroutine(DealDamageAfterDelay());
+            }
+            else
+            {
+                Debug.Log("<color=yellow>Already dealing damage, skipping coroutine</color>");
+            }
         }
+        else
+        {
+            float timeUntilNextAttack = (lastAttackTime + attackCooldown) - Time.time;
+            if (showAttackDebug && Time.frameCount % 60 == 0) // Only log occasionally
+            {
+                Debug.Log($"<color=grey>Attack on cooldown. {timeUntilNextAttack:F1}s remaining</color>");
+            }
+            
+            // Still in cooldown, just stay idle
+            isAttacking = false;
+            if (animator != null)
+            {
+                animator.SetBool("isWalking", false);
+                animator.SetBool("isAttacking", false);
+            }
+        }
+    }
+
+    // Called by EnemyHealth when counter attacking
+    void ForceCounterAttack()
+    {
+        Debug.Log("<color=yellow>★ COUNTER ATTACK!</color>");
+        lastAttackTime = Time.time - attackCooldown; // Reset cooldown
+        Attack();
+    }
+
+    System.Collections.IEnumerator DealDamageAfterDelay()
+    {
+        isDealingDamage = true;
+        Debug.Log($"<color=cyan>Waiting {attackDelay}s before dealing damage...</color>");
+        
+        yield return new WaitForSeconds(attackDelay);
+
+        Debug.Log("<color=cyan>Delay complete! Performing raycast attack...</color>");
+
+        // Get attack start position (sword point or enemy center)
+        Vector2 attackStartPos = attackPoint != null ? (Vector2)attackPoint.position : (Vector2)transform.position;
+        
+        Debug.Log($"Attack starting from: {attackStartPos}");
+
+        // Get all hits in both directions
+        RaycastHit2D[] hitsRight = Physics2D.RaycastAll(attackStartPos, Vector2.right, attackRange, playerLayer);
+        RaycastHit2D[] hitsLeft = Physics2D.RaycastAll(attackStartPos, Vector2.left, attackRange, playerLayer);
+
+        // Find player hit (ignore self)
+        RaycastHit2D hit = new RaycastHit2D();
+        Vector2 attackDirection = Vector2.right;
+        bool foundPlayer = false;
+
+        // Check right hits
+        foreach (RaycastHit2D h in hitsRight)
+        {
+            if (h.collider.gameObject != gameObject && h.collider.CompareTag("Player"))
+            {
+                hit = h;
+                attackDirection = Vector2.right;
+                foundPlayer = true;
+                Debug.Log($"<color=yellow>RIGHT raycast found player at distance {h.distance}</color>");
+                break;
+            }
+        }
+
+        // Check left hits if player not found yet
+        if (!foundPlayer)
+        {
+            foreach (RaycastHit2D h in hitsLeft)
+            {
+                if (h.collider.gameObject != gameObject && h.collider.CompareTag("Player"))
+                {
+                    hit = h;
+                    attackDirection = Vector2.left;
+                    foundPlayer = true;
+                    Debug.Log($"<color=yellow>LEFT raycast found player at distance {h.distance}</color>");
+                    break;
+                }
+            }
+        }
+
+        // Store for gizmo drawing
+        lastAttackRayStart = attackStartPos;
+        lastAttackRayEnd = attackStartPos + attackDirection * attackRange;
+
+        if (foundPlayer && hit.collider != null)
+        {
+            Debug.Log($"<color=yellow>Hit player: {hit.collider.gameObject.name}, Distance: {hit.distance}</color>");
+            
+            PlayerHealth playerHealth = hit.collider.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(attackDamage);
+                
+                if (showHitText)
+                {
+                    Debug.Log($"<color=red>★ HIT! Enemy dealt {attackDamage} damage to player!</color>");
+                }
+                
+                // Visual feedback
+                StartCoroutine(FlashPlayerRed(hit.collider.GetComponent<SpriteRenderer>()));
+                
+                if (showAttackDebug)
+                {
+                    Debug.Log("<color=green>✓ ATTACK HIT!</color>");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Player doesn't have PlayerHealth component!");
+            }
+        }
+        else
+        {
+            if (showAttackDebug)
+            {
+                Debug.Log("<color=yellow>✗ Attack missed - no player found</color>");
+            }
+        }
+
+        isDealingDamage = false;
+    }
+
+    System.Collections.IEnumerator FlashPlayerRed(SpriteRenderer playerSprite)
+    {
+        if (playerSprite == null) yield break;
+
+        Color originalColor = playerSprite.color;
+        playerSprite.color = hitFlashColor;
+        
+        yield return new WaitForSeconds(hitFlashDuration);
+        
+        playerSprite.color = originalColor;
     }
 
     void Idle()
@@ -213,16 +443,35 @@ public class SimpleEnemyAI : MonoBehaviour
         if (!showGizmos) return;
 
         // Draw detection range
-        Gizmos.color = new Color(1f, 1f, 0f, 0.3f); // Yellow
+        Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
         Gizmos.DrawWireSphere(transform.position, detectionRange);
 
-        // Draw attack range
-        Gizmos.color = new Color(1f, 0f, 0f, 0.5f); // Red
+        // Draw attack distance (when to start attacking)
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
         Gizmos.DrawWireSphere(transform.position, attackDistance);
 
         // Draw stopping distance
-        Gizmos.color = new Color(0f, 1f, 0f, 0.3f); // Green
+        Gizmos.color = new Color(0f, 1f, 0f, 0.3f);
         Gizmos.DrawWireSphere(transform.position, stoppingDistance);
+
+        // Draw attack range raycasts (BOTH directions)
+        Vector2 previewStart = attackPoint != null ? (Vector2)attackPoint.position : (Vector2)transform.position;
+        Vector2 previewEndRight = previewStart + Vector2.right * attackRange;
+        Vector2 previewEndLeft = previewStart + Vector2.left * attackRange;
+
+        Gizmos.color = new Color(1f, 0f, 0f, 0.6f); // Red
+        Gizmos.DrawLine(previewStart, previewEndRight);
+        Gizmos.DrawLine(previewStart, previewEndLeft);
+        Gizmos.DrawWireSphere(previewEndRight, 0.2f);
+        Gizmos.DrawWireSphere(previewEndLeft, 0.2f);
+
+        // If recently attacked, show actual attack ray
+        if (Application.isPlaying && Time.time - lastAttackTime < 0.5f)
+        {
+            Gizmos.color = Color.red; // Bright red
+            Gizmos.DrawLine(lastAttackRayStart, lastAttackRayEnd);
+            Gizmos.DrawSphere(lastAttackRayEnd, 0.15f);
+        }
 
         // Draw line to player if in range
         if (player != null && Vector2.Distance(transform.position, player.position) <= detectionRange)
@@ -236,6 +485,13 @@ public class SimpleEnemyAI : MonoBehaviour
         {
             Gizmos.color = isGrounded ? Color.green : Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+
+        // Draw attack point
+        if (attackPoint != null)
+        {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(attackPoint.position, 0.3f);
         }
     }
 }

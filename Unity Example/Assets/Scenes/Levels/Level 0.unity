@@ -362,7 +362,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: ab23dbf8e345a55408f4d188341ec6bc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -3027,7 +3027,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: ab23dbf8e345a55408f4d188341ec6bc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -3117,7 +3117,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: ab23dbf8e345a55408f4d188341ec6bc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -6592,7 +6592,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: ab23dbf8e345a55408f4d188341ec6bc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -10385,6 +10385,10 @@ PrefabInstance:
       propertyPath: cam
       value: 
       objectReference: {fileID: 873759332}
+    - target: {fileID: 4329393064971358885, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: hasWand
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -16242,6 +16246,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -87.172}
+--- !u!1001 &1428303064
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -54.726616
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -25.544924
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6930039295452909959, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588764092019822828, guid: e8233500c7af72748a5c507268d1766e, type: 3}
+      propertyPath: m_Name
+      value: WandPickup
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e8233500c7af72748a5c507268d1766e, type: 3}
 --- !u!1 &1438385699
 GameObject:
   m_ObjectHideFlags: 0
@@ -18488,7 +18549,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: ab23dbf8e345a55408f4d188341ec6bc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -25825,3 +25886,4 @@ SceneRoots:
   - {fileID: 873759331}
   - {fileID: 312698085}
   - {fileID: 1922801876}
+  - {fileID: 1428303064}

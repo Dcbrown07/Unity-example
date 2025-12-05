@@ -144,6 +144,10 @@ MonoBehaviour:
   parrySfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
   spinSpeed: 720
   trail: {fileID: 0}
+  hitPlayerEffect: {fileID: 0}
+  hitEnemyEffect: {fileID: 0}
+  parryEffect: {fileID: 0}
+  damageAmount: 1
 --- !u!60 &5277652419605204738
 PolygonCollider2D:
   m_ObjectHideFlags: 0

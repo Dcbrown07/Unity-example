@@ -28,6 +28,9 @@ public class PongOrb : MonoBehaviour
     public GameObject hitEnemyEffect;
     public GameObject parryEffect;
 
+    [Header("Damage")]
+    public int damageAmount = 1;
+
     private Vector2 direction = Vector2.right;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
@@ -63,6 +66,17 @@ public class PongOrb : MonoBehaviour
         if (trail != null)
         {
             trail.Clear();
+        }
+
+        // Ignore collision with owner
+        if (owner != null)
+        {
+            Collider2D ownerCollider = owner.GetComponent<Collider2D>();
+            Collider2D myCollider = GetComponent<Collider2D>();
+            if (ownerCollider != null && myCollider != null)
+            {
+                Physics2D.IgnoreCollision(myCollider, ownerCollider, true);
+            }
         }
 
         UpdateVisuals();
@@ -101,9 +115,11 @@ public class PongOrb : MonoBehaviour
         if (dir.sqrMagnitude == 0) dir = Vector2.right;
         direction = dir.normalized;
 
-        if (usePhysics && rb != null)
+        // Always set the velocity, regardless of usePhysics flag
+        if (rb != null)
         {
             rb.linearVelocity = direction * speed;
+            usePhysics = true; // Enable physics mode when we set direction
         }
 
         UpdateVisuals();
@@ -130,11 +146,10 @@ public class PongOrb : MonoBehaviour
             var playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
             if (playerHealth != null && hasBounced && currentType == OrbType.Fire)
             {
-                playerHealth.TakeDamage(1);
+                playerHealth.TakeDamage(damageAmount);
                 PlaySfx(hitPlayerSfx);
                 SpawnEffect(hitPlayerEffect);
                 Destroy(gameObject);
-                Debug.Log("Orb returned and hit its original player owner after bouncing.");
                 return;
             }
             return;
@@ -152,7 +167,6 @@ public class PongOrb : MonoBehaviour
                 if (trail != null) trail.emitting = true;
                 PlaySfx(parrySfx);
                 SpawnEffect(parryEffect);
-                Debug.Log("Orb parried by player and reflected.");
                 return;
             }
             else
@@ -160,27 +174,40 @@ public class PongOrb : MonoBehaviour
                 var hitPlayerHealth = collision.gameObject.GetComponent<PlayerHealth>();
                 if (hitPlayerHealth != null)
                 {
-                    hitPlayerHealth.TakeDamage(1);
+                    hitPlayerHealth.TakeDamage(damageAmount);
                     PlaySfx(hitPlayerSfx);
                     SpawnEffect(hitPlayerEffect);
-                    Debug.Log("Orb hit player and dealt damage.");
                 }
                 Destroy(gameObject);
                 return;
             }
         }
 
-        var enemy = collision.gameObject.GetComponent<EnemyController>();
-        if (enemy != null)
+        // Check for EnemyHealth (Kings Guard)
+        var enemyHealth = collision.gameObject.GetComponent<EnemyHealth>();
+        if (enemyHealth != null)
         {
-            enemy.TakeDamage(1);
+            Vector2 attackDirection = (transform.position - collision.transform.position).normalized;
+            enemyHealth.TakeDamage(damageAmount, attackDirection);
             PlaySfx(hitEnemySfx);
             SpawnEffect(hitEnemyEffect);
-            Debug.Log("Orb hit enemy: " + collision.gameObject.name);
             Destroy(gameObject);
             return;
         }
 
+        // Check for SimpleEnemy (new simple enemies)
+        var simpleEnemy = collision.gameObject.GetComponent<SimpleEnemy>();
+        if (simpleEnemy != null)
+        {
+            Vector2 attackDirection = (transform.position - collision.transform.position).normalized;
+            simpleEnemy.TakeDamage(damageAmount, attackDirection);
+            PlaySfx(hitEnemySfx);
+            SpawnEffect(hitEnemyEffect);
+            Destroy(gameObject);
+            return;
+        }
+
+        // Bounce off walls
         if (collision.contacts != null && collision.contacts.Length > 0)
         {
             Vector2 normal = collision.contacts[0].normal;
@@ -203,13 +230,11 @@ public class PongOrb : MonoBehaviour
             UpdateColor();
             PlaySfx(bounceSfx);
             if (trail != null) trail.emitting = true;
-            Debug.Log("Orb bounced off: " + collision.gameObject.name + " new dir: " + direction);
         }
         else
         {
             ReverseDirection();
             PlaySfx(bounceSfx);
-            Debug.Log("Orb collision without contacts; reversed as fallback.");
         }
     }
 
@@ -232,7 +257,6 @@ public class PongOrb : MonoBehaviour
                 if (trail != null) trail.emitting = true;
                 PlaySfx(parrySfx);
                 SpawnEffect(parryEffect);
-                Debug.Log("Orb parried by player and reflected (trigger).");
                 return;
             }
             else
@@ -240,23 +264,35 @@ public class PongOrb : MonoBehaviour
                 var hitPlayerHealth = other.GetComponent<PlayerHealth>();
                 if (hitPlayerHealth != null)
                 {
-                    hitPlayerHealth.TakeDamage(1);
+                    hitPlayerHealth.TakeDamage(damageAmount);
                     PlaySfx(hitPlayerSfx);
                     SpawnEffect(hitPlayerEffect);
-                    Debug.Log("Orb hit player and dealt damage (trigger).");
                 }
                 Destroy(gameObject);
                 return;
             }
         }
 
-        var enemy = other.GetComponent<EnemyController>();
-        if (enemy != null)
+        // Check for EnemyHealth (Kings Guard)
+        var enemyHealth = other.GetComponent<EnemyHealth>();
+        if (enemyHealth != null)
         {
-            enemy.TakeDamage(1);
+            Vector2 attackDirection = (transform.position - other.transform.position).normalized;
+            enemyHealth.TakeDamage(damageAmount, attackDirection);
             PlaySfx(hitEnemySfx);
             SpawnEffect(hitEnemyEffect);
-            Debug.Log("Orb hit enemy (trigger): " + other.gameObject.name);
+            Destroy(gameObject);
+            return;
+        }
+
+        // Check for SimpleEnemy (new simple enemies)
+        var simpleEnemy = other.GetComponent<SimpleEnemy>();
+        if (simpleEnemy != null)
+        {
+            Vector2 attackDirection = (transform.position - other.transform.position).normalized;
+            simpleEnemy.TakeDamage(damageAmount, attackDirection);
+            PlaySfx(hitEnemySfx);
+            SpawnEffect(hitEnemyEffect);
             Destroy(gameObject);
             return;
         }
