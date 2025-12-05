@@ -183,8 +183,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SimpleCameraFollow
   target: {fileID: 2864174771948869176}
   smoothSpeed: 0.125
-  offset: {x: 0, y: 2, z: 0}
-  cameraSize: 3.5
+  offset: {x: 5, y: 5, z: 0}
+  cameraSize: 8.05
   smoothZoom: 1
   zoomSpeed: 5
   useBounds: 0
