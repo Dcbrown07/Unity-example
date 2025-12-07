@@ -4,46 +4,60 @@ using System.Collections;
 public class LaserBeam : MonoBehaviour
 {
     [Header("Laser Settings")]
-    public float warningTime = 1f;
+    public float warningTime = 2f;
     public float activeTime = 2f;
     public int damage = 1;
     public float damageCooldown = 0.5f;
-    public GameObject boss; // Reference to the boss that spawned this laser
+    public GameObject boss;
     
     [Header("Visual Colors")]
-    public Color warningColor = new Color(1f, 1f, 0f, 0.3f); // Yellow transparent
-    public Color activeColor = new Color(1f, 0f, 0f, 0.8f); // Red semi-transparent
+    public Color warningColor = new Color(1f, 0f, 0f, 0.3f);
+    public Color activeColor = new Color(1f, 0f, 0f, 1f);
+    public float flashSpeed = 5f;
     
-    [Header("Animation")]
-    public Animator animator;
-    public string warningAnimationTrigger = "Warning";
-    public string activeAnimationTrigger = "Active";
+    [Header("Audio")]
+    public AudioClip warningSound;
+    public AudioClip activateSound;
+    public AudioClip hitSound;
+    private AudioSource audioSource;
+    
+    [Header("Effects")]
+    public bool screenShakeOnActivate = true;
+    public float shakeIntensity = 0.15f;
+    public GameObject activateParticles;
     
     private SpriteRenderer sprite;
-    private BoxCollider2D laserCollider;
+    private PolygonCollider2D laserCollider;
     private bool isActive = false;
     private float lastDamageTime = -999f;
+    public bool hasHitPlayer = false;
     
     void Start()
     {
         sprite = GetComponent<SpriteRenderer>();
-        laserCollider = GetComponent<BoxCollider2D>();
-        animator = GetComponent<Animator>();
+        laserCollider = GetComponent<PolygonCollider2D>();
+        audioSource = GetComponent<AudioSource>();
+        
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
         
         if (sprite == null)
         {
             sprite = gameObject.AddComponent<SpriteRenderer>();
+            Texture2D tex = new Texture2D(1, 1);
+            tex.SetPixel(0, 0, Color.white);
+            tex.Apply();
+            sprite.sprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f));
         }
         
         if (laserCollider == null)
         {
-            laserCollider = gameObject.AddComponent<BoxCollider2D>();
+            laserCollider = gameObject.AddComponent<PolygonCollider2D>();
             laserCollider.isTrigger = true;
         }
-        
-        // Set collider to match the laser beam size
-        laserCollider.size = new Vector2(1f, 1f);
-        laserCollider.offset = Vector2.zero; // Centered on the laser sprite
         
         // Ignore collision with boss
         if (boss != null)
@@ -60,39 +74,33 @@ public class LaserBeam : MonoBehaviour
     
     IEnumerator LaserSequence()
     {
-        // WARNING PHASE - Yellow, no damage, pulsing
-        if (sprite != null)
-        {
-            sprite.color = warningColor;
-        }
-        
+        // WARNING PHASE
         if (laserCollider != null)
         {
-            laserCollider.enabled = false; // No collision during warning
+            laserCollider.enabled = false;
         }
         
-        // Trigger warning animation if animator exists
-        if (animator != null && !string.IsNullOrEmpty(warningAnimationTrigger))
-        {
-            animator.SetTrigger(warningAnimationTrigger);
-        }
+        // Play warning sound
+        PlaySound(warningSound);
         
-        // Pulsing warning effect
+        Debug.Log("<color=yellow>⚠ Laser warning - FLASHING!</color>");
+        
+        // Flash warning
         float elapsedTime = 0f;
         while (elapsedTime < warningTime)
         {
             if (sprite != null)
             {
-                float pulse = Mathf.PingPong(Time.time * 3f, 1f);
-                sprite.color = Color.Lerp(warningColor, new Color(1f, 0.5f, 0f, 0.5f), pulse);
+                float alpha = Mathf.PingPong(Time.time * flashSpeed, 0.6f);
+                sprite.color = new Color(1f, 0f, 0f, alpha);
             }
             elapsedTime += Time.deltaTime;
             yield return null;
         }
         
-        Debug.Log("Laser warning complete!");
+        // ACTIVATE!
+        Debug.Log("<color=red>⚡ Laser ACTIVE - DANGER!</color>");
         
-        // ACTIVE PHASE - Red, deals damage
         if (sprite != null)
         {
             sprite.color = activeColor;
@@ -100,22 +108,91 @@ public class LaserBeam : MonoBehaviour
         
         if (laserCollider != null)
         {
-            laserCollider.enabled = true; // Enable collision
-        }
-        
-        // Trigger active animation if animator exists
-        if (animator != null && !string.IsNullOrEmpty(activeAnimationTrigger))
-        {
-            animator.SetTrigger(activeAnimationTrigger);
+            laserCollider.enabled = true;
         }
         
         isActive = true;
-        Debug.Log("Laser active!");
+        
+        // Play activate sound
+        PlaySound(activateSound);
+        
+        // Screen shake
+        if (screenShakeOnActivate)
+        {
+            StartCoroutine(ScreenShake());
+        }
+        
+        // Spawn particles
+        if (activateParticles != null)
+        {
+            Instantiate(activateParticles, transform.position, transform.rotation);
+        }
+        
+        // Pulse effect while active
+        StartCoroutine(ActivePulse());
         
         yield return new WaitForSeconds(activeTime);
         
-        // Destroy laser
+        // Laser ends
+        Debug.Log("<color=green>Laser deactivated</color>");
         Destroy(gameObject);
+    }
+    
+    IEnumerator ActivePulse()
+    {
+        float timer = 0f;
+        while (isActive && timer < activeTime)
+        {
+            if (sprite != null)
+            {
+                float intensity = Mathf.PingPong(Time.time * 8f, 0.3f);
+                sprite.color = Color.Lerp(activeColor, Color.white, intensity);
+            }
+            timer += Time.deltaTime;
+            yield return null;
+        }
+    }
+    
+    IEnumerator ScreenShake()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) cam = FindObjectOfType<Camera>();
+        if (cam == null) yield break;
+        
+        Vector3 originalPos = cam.transform.localPosition;
+        float elapsed = 0f;
+        float duration = 0.2f;
+        
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * shakeIntensity;
+            float y = Random.Range(-1f, 1f) * shakeIntensity;
+            
+            cam.transform.localPosition = originalPos + new Vector3(x, y, 0);
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        cam.transform.localPosition = originalPos;
+    }
+    
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!isActive) return;
+        
+        if (other.CompareTag("Player"))
+        {
+            hasHitPlayer = true;
+            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(damage);
+                lastDamageTime = Time.time;
+                PlaySound(hitSound);
+                Debug.Log($"<color=red>⚡ LASER HIT PLAYER for {damage} damage!</color>");
+            }
+        }
     }
     
     void OnTriggerStay2D(Collider2D other)
@@ -126,40 +203,40 @@ public class LaserBeam : MonoBehaviour
         {
             if (Time.time >= lastDamageTime + damageCooldown)
             {
+                hasHitPlayer = true;
                 PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
                 if (playerHealth != null)
                 {
                     playerHealth.TakeDamage(damage);
                     lastDamageTime = Time.time;
-                    Debug.Log($"Laser hit player for {damage} damage!");
+                    PlaySound(hitSound);
+                    Debug.Log($"<color=red>⚡ LASER BURNING PLAYER for {damage} damage!</color>");
                 }
             }
         }
     }
     
-    void OnDrawGizmos()
+    void PlaySound(AudioClip clip)
     {
-        // Draw the laser hitbox in editor AND in play mode
-        if (laserCollider != null)
+        if (clip != null && audioSource != null)
         {
-            Gizmos.color = isActive ? Color.red : Color.yellow;
-            Gizmos.matrix = transform.localToWorldMatrix;
-            Gizmos.DrawWireCube(laserCollider.offset, laserCollider.size);
-            
-            // Also draw a filled version so it's visible
-            Gizmos.color = isActive ? new Color(1, 0, 0, 0.3f) : new Color(1, 1, 0, 0.3f);
-            Gizmos.DrawCube(laserCollider.offset, laserCollider.size);
+            audioSource.PlayOneShot(clip);
         }
     }
     
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
-        // Draw even more detail when selected
-        if (laserCollider != null)
+        PolygonCollider2D col = GetComponent<PolygonCollider2D>();
+        if (col != null && col.points.Length > 0)
         {
-            Gizmos.color = Color.cyan;
-            Gizmos.matrix = transform.localToWorldMatrix;
-            Gizmos.DrawWireCube(laserCollider.offset, laserCollider.size);
+            Gizmos.color = isActive ? Color.red : new Color(1, 1, 0, 0.5f);
+            
+            for (int i = 0; i < col.points.Length; i++)
+            {
+                Vector2 p1 = transform.TransformPoint(col.points[i]);
+                Vector2 p2 = transform.TransformPoint(col.points[(i + 1) % col.points.Length]);
+                Gizmos.DrawLine(p1, p2);
+            }
         }
     }
 }

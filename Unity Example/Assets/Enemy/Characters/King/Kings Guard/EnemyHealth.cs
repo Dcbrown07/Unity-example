@@ -71,7 +71,6 @@ public class EnemyHealth : MonoBehaviour
 
     private Color originalColor;
     private bool isDead = false;
-    private bool isBlocking = false;
 
     void Start()
     {
@@ -220,8 +219,6 @@ public class EnemyHealth : MonoBehaviour
 
     void BlockAttack()
     {
-        isBlocking = true;
-
         if (showDebugLogs)
             Debug.Log($"<color=cyan>★ {gameObject.name} BLOCKED the attack!</color>");
 
@@ -233,8 +230,6 @@ public class EnemyHealth : MonoBehaviour
         {
             audioSource.PlayOneShot(blockSound);
         }
-
-        isBlocking = false;
     }
 
     IEnumerator DamageFlash()

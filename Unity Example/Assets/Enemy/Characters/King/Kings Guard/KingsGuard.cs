@@ -74,7 +74,7 @@ public class SimpleEnemyAI : MonoBehaviour
     
     [Tooltip("Distance player must move to trigger turn")]
     public float movementThreshold = 0.5f;
-    
+    private bool isAttacking = false;
     private float lastTurnTime = 0f;
     private bool isFacingRight = true;
     private Vector2 lastPlayerPosition;
@@ -82,8 +82,6 @@ public class SimpleEnemyAI : MonoBehaviour
     [Header("Debug")]
     public bool showGizmos = true;
     public bool showAttackDebug = true;
-
-    private bool isAttacking = false;
     private float distanceToPlayer;
     private bool isGrounded = false;
     private float lastAttackTime = -999f;

@@ -207,6 +207,17 @@ public class PongOrb : MonoBehaviour
             return;
         }
 
+        // Check for LaserBoss
+        var laserBoss = collision.gameObject.GetComponent<LaserBoss>();
+        if (laserBoss != null)
+        {
+            laserBoss.TakeDamage(damageAmount);
+            PlaySfx(hitEnemySfx);
+            SpawnEffect(hitEnemyEffect);
+            Destroy(gameObject);
+            return;
+        }
+
         // Bounce off walls
         if (collision.contacts != null && collision.contacts.Length > 0)
         {
@@ -291,6 +302,17 @@ public class PongOrb : MonoBehaviour
         {
             Vector2 attackDirection = (transform.position - other.transform.position).normalized;
             simpleEnemy.TakeDamage(damageAmount, attackDirection);
+            PlaySfx(hitEnemySfx);
+            SpawnEffect(hitEnemyEffect);
+            Destroy(gameObject);
+            return;
+        }
+
+        // Check for LaserBoss
+        var laserBoss = other.GetComponent<LaserBoss>();
+        if (laserBoss != null)
+        {
+            laserBoss.TakeDamage(damageAmount);
             PlaySfx(hitEnemySfx);
             SpawnEffect(hitEnemyEffect);
             Destroy(gameObject);

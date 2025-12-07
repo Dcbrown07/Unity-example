@@ -3082,6 +3082,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: KingsGuardEnemy
       objectReference: {fileID: 0}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: arenaMaxX
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: arenaMinX
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 9036999141487849278, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9.396555
@@ -4476,6 +4484,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 553833880501904568, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: enableWallSlide
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 553833880501904568, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 553833880501904568, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: enableSquashStretch
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1671195669145660529, guid: d956319ef258e834990185570c7f8339, type: 3}
       propertyPath: m_RenderingLayerMask
       value: 4294967295
@@ -4528,6 +4548,14 @@ PrefabInstance:
       propertyPath: cam
       value: 
       objectReference: {fileID: 937931637}
+    - target: {fileID: 4329393064971358885, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: fireballDamage
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4329393064971358885, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: enemyLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

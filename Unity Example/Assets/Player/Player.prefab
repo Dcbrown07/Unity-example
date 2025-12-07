@@ -182,8 +182,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimpleCameraFollow
   target: {fileID: 2864174771948869176}
-  smoothSpeed: 0.125
+  smoothSpeed: 1
+  verticalSmoothSpeed: 5
   offset: {x: 5, y: 5, z: 0}
+  usePrediction: 1
+  predictionAmount: 0.5
   cameraSize: 8.05
   smoothZoom: 1
   zoomSpeed: 5
@@ -192,6 +195,8 @@ MonoBehaviour:
   maxX: 10
   minY: -10
   maxY: 10
+  useDeadzone: 0
+  deadzoneRadius: 0.5
   showPreview: 1
   showBounds: 1
 --- !u!1 &4202892009642581899
@@ -234,6 +239,7 @@ Transform:
   m_Children:
   - {fileID: 3368904492186447885}
   - {fileID: 4084377421739732320}
+  - {fileID: 2435377657305743708}
   - {fileID: 1272981966469502553}
   - {fileID: 3052117931065059302}
   - {fileID: 5672256301309360033}
@@ -341,33 +347,54 @@ MonoBehaviour:
   deceleration: 70
   airAcceleration: 35
   airDeceleration: 25
+  canDash: 1
+  dashSpeed: 25
+  dashDuration: 0.12
+  dashCooldown: 0.4
+  maxDashCharges: 2
+  invincibleDuringDash: 1
   jumpForce: 20
+  shortHopMultiplier: 0.5
   coyoteTime: 0.15
   jumpBufferTime: 0.15
   fallMultiplier: 2.5
   lowJumpMultiplier: 2
   maxFallSpeed: -20
-  jumpCutMultiplier: 0.4
+  airControlMultiplier: 0.85
+  allowAirTurnaround: 1
+  airDragOnStop: 0.95
   apexThreshold: 2
-  apexMultiplier: 0.5
+  apexGravityMultiplier: 0.2
   apexHangTime: 0.1
+  enableWallSlide: 1
+  wallSlideSpeed: 2
+  wallJumpForce: 18
+  wallJumpAngle: {x: 1, y: 1.5}
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  wallCheckLeft: {fileID: 2435377657305743708}
+  wallCheckRight: {fileID: 4084377421739732320}
+  wallCheckDistance: 0.3
   groundCheck: {fileID: 3368904492186447885}
   groundCheckRadius: 0.3
   groundLayer:
     serializedVersion: 2
     m_Bits: 4294967295
-  jumpDust: {fileID: 6176873833367218900}
-  landingDust: {fileID: 6176873833367218900}
-  walkDust: {fileID: 0}
+  enableFastFall: 1
+  fastFallMultiplier: 2
   enableSquashStretch: 1
-  scaleXNormal: 1
-  scaleYNormal: 1
-  scaleXStretch: 1.2
-  scaleYSquash: 0.8
   scaleSpeed: 20
-  landingBoostMultiplier: 1.1
-  turnAroundBoost: 1.2
-  dodgeBoost: 1.5
+  dashTrailPrefab: {fileID: 0}
+  landingDustPrefab: {fileID: 0}
+  jumpDustPrefab: {fileID: 0}
+  wallSlideDustPrefab: {fileID: 0}
+  jumpSound: {fileID: 0}
+  dashSound: {fileID: 0}
+  landSound: {fileID: 0}
+  wallSlideSound: {fileID: 0}
+  enableInputBuffer: 1
+  inputBufferTime: 0.1
 --- !u!96 &5003661151261980286
 TrailRenderer:
   serializedVersion: 3
@@ -503,17 +530,52 @@ MonoBehaviour:
   wand: {fileID: 5672256301309360033}
   wandSprite: {fileID: 4603390866278502707}
   fireballPrefab: {fileID: 9064244959529392651, guid: 40a996b8628611b4cadd6e919da80f37, type: 3}
+  playerSprite: {fileID: 0}
   hasWand: 1
   showWandVisuals: 1
   fireballForce: 10
+  fireballDamage: 1
   manaCostPerShot: 20
+  fireRate: 0.2
+  canChargeShot: 1
+  chargeTime: 1
+  maxChargeMultiplier: 3
+  chargeColor: {r: 1, g: 0.5, b: 0, a: 1}
   wandDistance: 1
   orbitSpeed: 8
+  wandKickback: 0.3
   collisionMask:
     serializedVersion: 2
     m_Bits: 0
   collisionRadius: 0.3
   parryWindow: 0.3
+  parryCooldown: 1
+  parrySlowmoScale: 0.3
+  parrySlowmoDuration: 0.2
+  canDash: 1
+  dashSpeed: 20
+  dashDuration: 0.15
+  dashCooldown: 1
+  dashMana: 15
+  canMelee: 1
+  meleeRange: 2
+  meleeDamage: 3
+  meleeCooldown: 0.5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  shootSound: {fileID: 0}
+  chargeSound: {fileID: 0}
+  parrySound: {fileID: 0}
+  dashSound: {fileID: 0}
+  meleeSound: {fileID: 0}
+  screenShakeOnShoot: 1
+  shootShakeIntensity: 0.1
+  chargeShakeIntensity: 0.3
+  meleeShakeIntensity: 0.15
+  muzzleFlashPrefab: {fileID: 0}
+  chargeEffectPrefab: {fileID: 0}
+  dashTrailPrefab: {fileID: 0}
 --- !u!114 &3182118541241127025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -658,7 +720,7 @@ Transform:
   m_GameObject: {fileID: 4643864467780023090}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.09953069, w: 0.9950345}
-  m_LocalPosition: {x: -0.04, y: 0.82, z: 0}
+  m_LocalPosition: {x: 0.25, y: 0.436, z: 0}
   m_LocalScale: {x: 5.5272927, y: 1.7334263, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -674,7 +736,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4084377421739732320}
   m_Layer: 3
-  m_Name: FrontCheck
+  m_Name: RightCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5531,6 +5593,37 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!1 &7589167494431950562
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2435377657305743708}
+  m_Layer: 3
+  m_Name: LeftCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2435377657305743708
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7589167494431950562}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.81, y: 0.09, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2864174771948869176}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8357211740902164597
 GameObject:
   m_ObjectHideFlags: 0

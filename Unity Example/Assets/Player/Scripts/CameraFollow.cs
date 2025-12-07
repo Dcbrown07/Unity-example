@@ -7,12 +7,24 @@ public class AdvancedCameraFollow : MonoBehaviour
     public Transform target;
     
     [Header("Follow Settings")]
-    [Tooltip("How smooth the camera follows (0 = instant, 1 = very slow)")]
-    [Range(0f, 1f)]
-    public float smoothSpeed = 0.125f;
+    [Tooltip("How smooth the camera follows (higher = smoother)")]
+    [Range(1f, 30f)]
+    public float smoothSpeed = 10f;
+    
+    [Tooltip("Separate vertical smoothing to prevent jump jerk")]
+    [Range(1f, 30f)]
+    public float verticalSmoothSpeed = 5f;
     
     [Tooltip("Offset from target position")]
     public Vector3 offset = new Vector3(0, 0, -10);
+    
+    [Header("Prediction (Reduces Lag)")]
+    [Tooltip("Look ahead based on player velocity")]
+    public bool usePrediction = true;
+    
+    [Tooltip("How far ahead to look (0 = none, 1 = aggressive)")]
+    [Range(0f, 2f)]
+    public float predictionAmount = 0.5f;
 
     [Header("Zoom Settings")]
     [Tooltip("Camera zoom level (lower = more zoomed in)")]
@@ -35,6 +47,13 @@ public class AdvancedCameraFollow : MonoBehaviour
     public float maxX = 10f;
     public float minY = -10f;
     public float maxY = 10f;
+    
+    [Header("Deadzone (Prevents Jitter)")]
+    [Tooltip("Player can move this much before camera follows")]
+    public bool useDeadzone = false;
+    
+    [Range(0f, 3f)]
+    public float deadzoneRadius = 0.5f;
 
     [Header("Editor Preview")]
     [Tooltip("Show camera view in scene")]
@@ -44,6 +63,8 @@ public class AdvancedCameraFollow : MonoBehaviour
     public bool showBounds = true;
 
     private Camera cam;
+    private Vector3 velocity = Vector3.zero;
+    private Vector3 lastTargetPosition;
 
     void Start()
     {
@@ -57,6 +78,12 @@ public class AdvancedCameraFollow : MonoBehaviour
         if (target == null)
         {
             Debug.LogWarning("No target assigned to camera!");
+        }
+        else
+        {
+            lastTargetPosition = target.position;
+            // Snap camera to target on start (no lerp)
+            transform.position = target.position + offset;
         }
     }
 
@@ -84,7 +111,31 @@ public class AdvancedCameraFollow : MonoBehaviour
     {
         if (target == null) return;
 
-        Vector3 desiredPosition = target.position + offset;
+        // Calculate target velocity for prediction
+        Vector3 targetVelocity = Vector3.zero;
+        if (usePrediction && Time.deltaTime > 0)
+        {
+            targetVelocity = (target.position - lastTargetPosition) / Time.deltaTime;
+        }
+        lastTargetPosition = target.position;
+
+        // Desired position with prediction
+        Vector3 predictedPosition = target.position + (targetVelocity * predictionAmount * Time.deltaTime);
+        Vector3 desiredPosition = predictedPosition + offset;
+
+        // Deadzone check
+        if (useDeadzone)
+        {
+            float distanceToTarget = Vector2.Distance(
+                new Vector2(transform.position.x, transform.position.y),
+                new Vector2(desiredPosition.x, desiredPosition.y)
+            );
+            
+            if (distanceToTarget < deadzoneRadius)
+            {
+                return; // Don't move camera if within deadzone
+            }
+        }
 
         // Apply boundaries if enabled
         if (useBounds)
@@ -96,7 +147,26 @@ public class AdvancedCameraFollow : MonoBehaviour
         // Keep camera Z from offset
         desiredPosition.z = offset.z;
         
-        transform.position = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
+        // Separate horizontal and vertical smoothing to prevent jump jerk
+        Vector3 currentPos = transform.position;
+        
+        // Smooth horizontal movement
+        float newX = Mathf.SmoothDamp(
+            currentPos.x,
+            desiredPosition.x,
+            ref velocity.x,
+            1f / smoothSpeed
+        );
+        
+        // Smoother vertical movement (prevents jump jerk)
+        float newY = Mathf.SmoothDamp(
+            currentPos.y,
+            desiredPosition.y,
+            ref velocity.y,
+            1f / verticalSmoothSpeed
+        );
+        
+        transform.position = new Vector3(newX, newY, desiredPosition.z);
     }
 
     void OnDrawGizmos()
@@ -140,6 +210,13 @@ public class AdvancedCameraFollow : MonoBehaviour
         float crossSize = 0.5f;
         Gizmos.DrawLine(previewPos + Vector3.left * crossSize, previewPos + Vector3.right * crossSize);
         Gizmos.DrawLine(previewPos + Vector3.down * crossSize, previewPos + Vector3.up * crossSize);
+
+        // Draw deadzone
+        if (useDeadzone)
+        {
+            Gizmos.color = new Color(0f, 1f, 0f, 0.3f);
+            Gizmos.DrawWireSphere(previewPos, deadzoneRadius);
+        }
 
         // Draw boundaries
         if (useBounds && showBounds)

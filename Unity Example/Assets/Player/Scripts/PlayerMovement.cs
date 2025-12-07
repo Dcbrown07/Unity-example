@@ -1,280 +1,625 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController2D : MonoBehaviour
 {
-    [Header("Movement")]
-    public float moveSpeed = 6f;
-    public float acceleration = 50f;     // How fast you reach max speed
-    public float deceleration = 70f;     // How fast you stop
-    public float airAcceleration = 35f;  // Slower acceleration in air
-    public float airDeceleration = 25f;  // Slower deceleration in air
-    private float moveInput;
-    private Animator animator;
-
-    [Header("Jumping")]
-    public float jumpForce = 14f;
-    public float coyoteTime = 0.15f;     // Slightly longer for forgiveness
-    public float jumpBufferTime = 0.2f;  // Longer buffer time
-    public float fallMultiplier = 2.5f;
-    public float lowJumpMultiplier = 2f;
-    public float maxFallSpeed = -20f;
-    public float jumpCutMultiplier = 0.4f; // More responsive jump cutting
+    [Header("Movement - Hollow Knight Style")]
+    [Range(4f, 12f)]
+    public float moveSpeed = 8f;
+    public float acceleration = 80f;
+    public float deceleration = 100f;
+    public float airAcceleration = 60f;
+    public float airDeceleration = 40f;
     
-    [Header("Jump Apex")]
-    public float apexThreshold = 3f;
-    public float apexMultiplier = 0.3f;  // Even floatier apex
-    public float apexHangTime = 0.1f;    // Extra hang time at peak
-
+    [Header("Dashing - Bullet Hell Precision")]
+    public bool canDash = true;
+    public float dashSpeed = 25f;
+    public float dashDuration = 0.12f;
+    public float dashCooldown = 0.4f;
+    public int maxDashCharges = 2;
+    public bool invincibleDuringDash = true;
+    private int currentDashCharges;
+    private float lastDashTime = -999f;
+    private bool isDashing = false;
+    private Vector2 dashDirection;
+    
+    [Header("Jumping - Tight & Responsive")]
+    public float jumpForce = 16f;
+    public float shortHopMultiplier = 0.5f;
+    public float coyoteTime = 0.1f;
+    public float jumpBufferTime = 0.15f;
+    public float fallMultiplier = 3f;
+    public float lowJumpMultiplier = 2.5f;
+    public float maxFallSpeed = -25f;
+    
+    [Header("Air Control - Bullet Hell Precision")]
+    public float airControlMultiplier = 0.85f;
+    public bool allowAirTurnaround = true;
+    public float airDragOnStop = 0.95f;
+    
+    [Header("Jump Apex - Hollow Knight Float")]
+    public float apexThreshold = 2f;
+    public float apexGravityMultiplier = 0.2f;
+    public float apexHangTime = 0.15f;
+    
+    [Header("Wall Interaction")]
+    public bool enableWallSlide = true;
+    public float wallSlideSpeed = 2f;
+    public float wallJumpForce = 18f;
+    public Vector2 wallJumpAngle = new Vector2(1f, 1.5f);
+    public LayerMask wallLayer;
+    public Transform wallCheckLeft;
+    public Transform wallCheckRight;
+    public float wallCheckDistance = 0.3f;
+    private bool isTouchingWallLeft;
+    private bool isTouchingWallRight;
+    private bool isWallSliding;
+    private float wallJumpTime = 0f;
+    private float wallJumpDuration = 0.15f;
+    
+    [Header("Ground Check")]
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.25f;
+    public LayerMask groundLayer;
+    private bool isGrounded;
+    private bool wasGrounded;
+    
+    [Header("Fast Fall - Bullet Hell Dodge")]
+    public bool enableFastFall = true;
+    public float fastFallMultiplier = 2f;
+    private bool isFastFalling = false;
+    
     private float coyoteCounter;
     private float jumpBufferCounter;
     private bool hasJumped = false;
-
-    [Header("Ground Check")]
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
-    public LayerMask groundLayer = 1 << 3;
-    private bool isGrounded;
-    private bool wasGrounded;
-
+    private float moveInput;
+    
     [Header("References")]
     private Rigidbody2D rb;
     private SpriteRenderer sr;
-
-    [Header("Particles")]
-    public ParticleSystem jumpDust;
-    public ParticleSystem landingDust;
-    public ParticleSystem walkDust;
-
-    [Header("Squash & Stretch")]
-    public bool enableSquashStretch = true;
-    public float scaleXNormal = 1f;
-    public float scaleYNormal = 1f;
-    public float scaleXStretch = 1.1f;
-    public float scaleYSquash = 0.9f;
-    public float scaleSpeed = 12f;
+    private Animator animator;
+    private Collider2D playerCollider;
     
-    [Header("Arena Movement Feel")]
-    public float landingBoostMultiplier = 1.1f; // Slight speed boost on landing
-    public float turnAroundBoost = 1.2f;        // Speed boost when changing direction
-    public float dodgeBoost = 1.5f;             // Extra speed for dodging spells
-    private float lastMoveDirection = 0f;
-    private float landingBoostTimer = 0f;
-    private float dodgeBoostTimer = 0f;
-
+    [Header("Visual Effects")]
+    public bool enableSquashStretch = true;
+    public float scaleSpeed = 15f;
+    public GameObject dashTrailPrefab;
+    public GameObject landingDustPrefab;
+    public GameObject jumpDustPrefab;
+    public GameObject wallSlideDustPrefab;
+    
+    [Header("Audio")]
+    public AudioClip jumpSound;
+    public AudioClip dashSound;
+    public AudioClip landSound;
+    public AudioClip wallSlideSound;
+    private AudioSource audioSource;
+    
+    [Header("Advanced Feel")]
+    public bool enableInputBuffer = true;
+    public float inputBufferTime = 0.1f;
+    private float lastMoveInputTime = -999f;
+    private float lastMoveInputDirection = 0f;
+    
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
-        wasGrounded = true;
         animator = GetComponent<Animator>();
+        playerCollider = GetComponent<Collider2D>();
+        
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        
+        currentDashCharges = maxDashCharges;
+        wasGrounded = true;
+        
+        // Optimize physics
+        if (rb != null)
+        {
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        }
     }
-
+    
     void Update()
     {
-        moveInput = Input.GetAxisRaw("Horizontal");
-
-        // Flip sprite
-        if (moveInput != 0)
-            sr.flipX = moveInput < 0;
-
-        // Ground check
+        CheckGrounded();
+        CheckWalls();
+        HandleInput();
+        HandleJump();
+        HandleDash();
+        HandleWallSlide();
+        HandleFastFall();
+        UpdateAnimations();
+        
+        // Recharge dash on ground
+        if (isGrounded && currentDashCharges < maxDashCharges)
+        {
+            currentDashCharges = maxDashCharges;
+        }
+    }
+    
+    void FixedUpdate()
+    {
+        if (!isDashing)
+        {
+            HandleMovement();
+            HandleGravity();
+        }
+        else
+        {
+            HandleDashMovement();
+        }
+    }
+    
+    void CheckGrounded()
+    {
+        wasGrounded = isGrounded;
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-
-        // Coyote time and jump reset
+        
+        // Coyote time
         if (isGrounded)
         {
             coyoteCounter = coyoteTime;
             hasJumped = false;
             
-            if (!wasGrounded) // just landed
+            // Landing
+            if (!wasGrounded)
             {
-                landingBoostTimer = 0.3f; // Give landing boost for brief period
-                
-                if (landingDust != null)
-                    landingDust.Play();
+                OnLanded();
             }
         }
         else
         {
             coyoteCounter -= Time.deltaTime;
         }
-
-        // Timers
-        if (landingBoostTimer > 0)
-            landingBoostTimer -= Time.deltaTime;
-        if (dodgeBoostTimer > 0)
-            dodgeBoostTimer -= Time.deltaTime;
-
-        wasGrounded = isGrounded;
-
+    }
+    
+    void CheckWalls()
+    {
+        if (!enableWallSlide) return;
+        
+        isTouchingWallLeft = Physics2D.Raycast(wallCheckLeft.position, Vector2.left, wallCheckDistance, wallLayer);
+        isTouchingWallRight = Physics2D.Raycast(wallCheckRight.position, Vector2.right, wallCheckDistance, wallLayer);
+    }
+    
+    void HandleInput()
+    {
+        moveInput = Input.GetAxisRaw("Horizontal");
+        
+        // Input buffering for precise control
+        if (enableInputBuffer && Mathf.Abs(moveInput) > 0.1f)
+        {
+            lastMoveInputTime = Time.time;
+            lastMoveInputDirection = moveInput;
+        }
+        
+        // Sprite flipping
+        if (Mathf.Abs(moveInput) > 0.1f && !isWallSliding && Time.time > wallJumpTime + wallJumpDuration)
+        {
+            sr.flipX = moveInput < 0;
+        }
+    }
+    
+    void HandleJump()
+    {
         // Jump buffer
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W))
+        {
             jumpBufferCounter = jumpBufferTime;
+        }
         else
+        {
             jumpBufferCounter -= Time.deltaTime;
-
-        // Jump
+        }
+        
+        // Wall jump
+        if (jumpBufferCounter > 0f && isWallSliding)
+        {
+            WallJump();
+            return;
+        }
+        
+        // Normal jump
         if (jumpBufferCounter > 0f && coyoteCounter > 0f && !hasJumped)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            jumpBufferCounter = 0f;
-            coyoteCounter = 0f;
-            hasJumped = true;
-
-            if (jumpDust != null)
-                jumpDust.Play();
+            Jump();
         }
-
-        // Variable jump height with better feel
+        
+        // Short hop (release early)
         if ((Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.W)) && rb.linearVelocity.y > 0f)
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
-
-        // Dodge boost trigger (could be called from spell detection)
-        if (Input.GetKeyDown(KeyCode.LeftShift) && Mathf.Abs(moveInput) > 0.1f)
         {
-            TriggerDodgeBoost();
-        }
-
-        // Walking dust
-        if (walkDust != null && isGrounded && Mathf.Abs(moveInput) > 0.1f)
-        {
-            if (!walkDust.isPlaying)
-                walkDust.Play();
-        }
-        else if (walkDust != null && walkDust.isPlaying)
-            walkDust.Stop();
-
-        // Squash & stretch
-        if (enableSquashStretch)
-            AnimateSquashStretch();
-        else
-            transform.localScale = new Vector3(scaleXNormal, scaleYNormal, 1f);
-    }
-
-    void FixedUpdate()
-    {
-        HandleMovement();
-        HandleGravity();
-        
-        // Animation
-        if (Mathf.Abs(moveInput) > 0.1f && isGrounded) {
-            animator.SetBool("isRunning", true);
-        } else {
-            animator.SetBool("isRunning", false);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * shortHopMultiplier);
         }
     }
-
-    void HandleMovement()
+    
+    void Jump()
     {
-        float targetSpeed = moveInput * moveSpeed;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        jumpBufferCounter = 0f;
+        coyoteCounter = 0f;
+        hasJumped = true;
+        isFastFalling = false;
         
-        // Apply movement boosts for arena feel
-        if (landingBoostTimer > 0 && Mathf.Abs(moveInput) > 0.1f)
+        PlaySound(jumpSound);
+        SpawnEffect(jumpDustPrefab, transform.position);
+        StartCoroutine(JumpSquash());
+    }
+    
+    void WallJump()
+    {
+        wallJumpTime = Time.time;
+        jumpBufferCounter = 0f;
+        hasJumped = true;
+        isFastFalling = false;
+        
+        // Jump away from wall
+        float jumpDirection = isTouchingWallRight ? -1f : 1f;
+        Vector2 force = new Vector2(wallJumpAngle.x * jumpDirection, wallJumpAngle.y).normalized * wallJumpForce;
+        
+        rb.linearVelocity = force;
+        
+        PlaySound(jumpSound);
+        SpawnEffect(jumpDustPrefab, transform.position);
+        StartCoroutine(JumpSquash());
+    }
+    
+    void HandleDash()
+    {
+        if (!canDash || isDashing) return;
+        
+        if ((Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift)) && 
+            currentDashCharges > 0 && Time.time >= lastDashTime + dashCooldown)
         {
-            targetSpeed *= landingBoostMultiplier;
-        }
-        
-        if (dodgeBoostTimer > 0 && Mathf.Abs(moveInput) > 0.1f)
-        {
-            targetSpeed *= dodgeBoost;
-        }
-        
-        // Apply turn-around boost for snappy direction changes
-        if (moveInput != 0 && Mathf.Sign(moveInput) != Mathf.Sign(lastMoveDirection) && Mathf.Abs(lastMoveDirection) > 0.1f)
-        {
-            targetSpeed *= turnAroundBoost;
-        }
-        
-        lastMoveDirection = moveInput;
-        
-        // Choose acceleration/deceleration based on ground state
-        float accelRate;
-        if (Mathf.Abs(targetSpeed) > 0.01f)
-        {
-            accelRate = isGrounded ? acceleration : airAcceleration;
-        }
-        else
-        {
-            accelRate = isGrounded ? deceleration : airDeceleration;
-        }
-        
-        // Use direct velocity setting for reliable movement (like your original script)
-        rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
-        
-        // But add some smoothing for feel when changing directions
-        if (Mathf.Abs(moveInput) < 0.1f && isGrounded)
-        {
-            // Smooth deceleration when stopping
-            float newVelocityX = Mathf.MoveTowards(rb.linearVelocity.x, 0, deceleration * Time.fixedDeltaTime);
-            rb.linearVelocity = new Vector2(newVelocityX, rb.linearVelocity.y);
+            StartCoroutine(Dash());
         }
     }
-
-    void HandleGravity()
+    
+    IEnumerator Dash()
     {
-        // Jump apex handling for floaty combat feel
-        bool isNearApex = Mathf.Abs(rb.linearVelocity.y) < apexThreshold && rb.linearVelocity.y > 0;
+        isDashing = true;
+        currentDashCharges--;
+        lastDashTime = Time.time;
+        isFastFalling = false;
         
-        if (rb.linearVelocity.y < 0)
+        // Determine dash direction (8-directional)
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        
+        // Default to facing direction if no input
+        if (Mathf.Abs(horizontal) < 0.1f && Mathf.Abs(vertical) < 0.1f)
         {
-            // Falling - faster gravity
-            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.fixedDeltaTime;
+            horizontal = sr.flipX ? -1 : 1;
         }
-        else if (rb.linearVelocity.y > 0 && !(Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W)))
+        
+        dashDirection = new Vector2(horizontal, vertical).normalized;
+        if (dashDirection == Vector2.zero) dashDirection = Vector2.right;
+        
+        PlaySound(dashSound);
+        
+        // Invincibility
+        if (invincibleDuringDash && playerCollider != null)
         {
-            if (isNearApex)
+            Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), true);
+        }
+        
+        // Dash trail
+        StartCoroutine(DashTrail());
+        
+        float elapsed = 0f;
+        while (elapsed < dashDuration)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        isDashing = false;
+        
+        // Re-enable collisions
+        if (invincibleDuringDash && playerCollider != null)
+        {
+            Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), false);
+        }
+    }
+    
+    void HandleDashMovement()
+    {
+        rb.linearVelocity = dashDirection * dashSpeed;
+    }
+    
+    void HandleWallSlide()
+    {
+        if (!enableWallSlide) return;
+        
+        bool shouldWallSlide = !isGrounded && 
+                              (isTouchingWallLeft || isTouchingWallRight) && 
+                              rb.linearVelocity.y < 0 &&
+                              Time.time > wallJumpTime + wallJumpDuration;
+        
+        if (shouldWallSlide)
+        {
+            // Check if pushing into wall
+            bool pushingIntoWall = (isTouchingWallLeft && moveInput < -0.1f) || 
+                                   (isTouchingWallRight && moveInput > 0.1f);
+            
+            if (pushingIntoWall || Mathf.Abs(moveInput) < 0.1f)
             {
-                // Apex hang time - very reduced gravity for spell aiming
-                rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (apexMultiplier - 1) * Time.fixedDeltaTime;
+                isWallSliding = true;
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -wallSlideSpeed));
+                
+                // Face wall
+                sr.flipX = isTouchingWallRight;
             }
             else
             {
-                // Rising but not holding jump
-                rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.fixedDeltaTime;
+                isWallSliding = false;
             }
+        }
+        else
+        {
+            isWallSliding = false;
+        }
+    }
+    
+    void HandleFastFall()
+    {
+        if (!enableFastFall || isGrounded || isDashing) return;
+        
+        // Press down to fast fall
+        if (Input.GetKey(KeyCode.S) && rb.linearVelocity.y < 0)
+        {
+            isFastFalling = true;
+        }
+        
+        if (isFastFalling && rb.linearVelocity.y < 0)
+        {
+            rb.linearVelocity += Vector2.down * fastFallMultiplier * Time.deltaTime * 60f;
+        }
+    }
+    
+    void HandleMovement()
+    {
+        if (isWallSliding) return;
+        
+        // Wall jump override
+        if (Time.time < wallJumpTime + wallJumpDuration)
+        {
+            return;
+        }
+        
+        float targetSpeed = moveInput * moveSpeed;
+        
+        // Air control adjustment
+        if (!isGrounded)
+        {
+            targetSpeed *= airControlMultiplier;
+        }
+        
+        // Choose acceleration based on state
+        float accelRate;
+        bool isAccelerating = Mathf.Abs(targetSpeed) > 0.01f;
+        
+        if (isGrounded)
+        {
+            accelRate = isAccelerating ? acceleration : deceleration;
+        }
+        else
+        {
+            accelRate = isAccelerating ? airAcceleration : airDeceleration;
+            
+            // Air drag when no input
+            if (!isAccelerating && allowAirTurnaround)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x * airDragOnStop, rb.linearVelocity.y);
+            }
+        }
+        
+        // Smooth movement
+        float newVelocityX = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accelRate * Time.fixedDeltaTime);
+        rb.linearVelocity = new Vector2(newVelocityX, rb.linearVelocity.y);
+    }
+    
+    void HandleGravity()
+    {
+        if (isWallSliding || isDashing) return;
+        
+        bool isNearApex = Mathf.Abs(rb.linearVelocity.y) < apexThreshold && !isGrounded;
+        
+        if (rb.linearVelocity.y < 0)
+        {
+            // Falling
+            float gravityMult = isFastFalling ? fallMultiplier * 2f : fallMultiplier;
+            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (gravityMult - 1) * Time.fixedDeltaTime;
         }
         else if (rb.linearVelocity.y > 0)
         {
-            if (isNearApex)
+            if (isNearApex && (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W)))
             {
-                // Apex with jump held - maximum hang time for precise aiming
-                rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (apexMultiplier * 0.2f - 1) * Time.fixedDeltaTime;
+                // Apex hang with jump held
+                rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (apexGravityMultiplier - 1) * Time.fixedDeltaTime;
+            }
+            else if (!(Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W)))
+            {
+                // Released jump
+                rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.fixedDeltaTime;
             }
         }
-
+        
         // Clamp fall speed
         if (rb.linearVelocity.y < maxFallSpeed)
+        {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
-    }
-
-    // Public method that can be called when player needs to dodge spells
-    public void TriggerDodgeBoost()
-    {
-        dodgeBoostTimer = 0.2f;
-    }
-
-    void AnimateSquashStretch()
-    {
-        Vector3 targetScale = new Vector3(scaleXNormal, scaleYNormal, 1f);
-
-        if (!isGrounded) // In air
-        {
-            targetScale = new Vector3(scaleXStretch, scaleYSquash, 1f);
         }
-        else if (Mathf.Abs(moveInput) > 0.1f) // Walking
-        {
-            targetScale = new Vector3(scaleXStretch, scaleYNormal, 1f);
-        }
-
-        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * scaleSpeed);
     }
-
+    
+    void OnLanded()
+    {
+        isFastFalling = false;
+        PlaySound(landSound);
+        SpawnEffect(landingDustPrefab, groundCheck.position);
+        StartCoroutine(LandSquash());
+    }
+    
+    IEnumerator JumpSquash()
+    {
+        if (!enableSquashStretch) yield break;
+        
+        Vector3 targetScale = new Vector3(0.8f, 1.3f, 1f);
+        float elapsed = 0f;
+        float duration = 0.1f;
+        
+        while (elapsed < duration)
+        {
+            transform.localScale = Vector3.Lerp(transform.localScale, targetScale, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
+    
+    IEnumerator LandSquash()
+    {
+        if (!enableSquashStretch) yield break;
+        
+        Vector3 targetScale = new Vector3(1.3f, 0.7f, 1f);
+        float elapsed = 0f;
+        float duration = 0.1f;
+        
+        while (elapsed < duration)
+        {
+            transform.localScale = Vector3.Lerp(transform.localScale, targetScale, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
+    
+    IEnumerator DashTrail()
+    {
+        float trailDuration = dashDuration + 0.1f;
+        float elapsed = 0f;
+        
+        while (elapsed < trailDuration)
+        {
+            if (sr != null)
+            {
+                GameObject trail = new GameObject("DashTrail");
+                trail.transform.position = transform.position;
+                trail.transform.localScale = transform.localScale;
+                
+                SpriteRenderer trailSr = trail.AddComponent<SpriteRenderer>();
+                trailSr.sprite = sr.sprite;
+                trailSr.color = new Color(0.5f, 1f, 1f, 0.5f);
+                trailSr.sortingLayerName = sr.sortingLayerName;
+                trailSr.sortingOrder = sr.sortingOrder - 1;
+                trailSr.flipX = sr.flipX;
+                
+                StartCoroutine(FadeTrail(trailSr, 0.2f));
+            }
+            
+            elapsed += 0.03f;
+            yield return new WaitForSeconds(0.03f);
+        }
+    }
+    
+    IEnumerator FadeTrail(SpriteRenderer trailSr, float duration)
+    {
+        Color start = trailSr.color;
+        float elapsed = 0f;
+        
+        while (elapsed < duration)
+        {
+            trailSr.color = Color.Lerp(start, Color.clear, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        Destroy(trailSr.gameObject);
+    }
+    
+    void UpdateAnimations()
+    {
+        if (animator == null) return;
+        
+        // Only set parameters that exist - wrapped to prevent warnings
+        try
+        {
+            if (animator.parameters.Length > 0)
+            {
+                animator.SetBool("isRunning", Mathf.Abs(moveInput) > 0.1f && isGrounded);
+            }
+        }
+        catch
+        {
+            // Animator parameter doesn't exist, skip
+        }
+        
+        // Squash stretch when not animated
+        if (enableSquashStretch)
+        {
+            Vector3 targetScale = Vector3.one;
+            
+            if (isDashing)
+            {
+                targetScale = new Vector3(1.3f, 0.8f, 1f);
+            }
+            else if (!isGrounded && !isWallSliding)
+            {
+                if (rb.linearVelocity.y > 0)
+                    targetScale = new Vector3(0.9f, 1.2f, 1f);
+                else
+                    targetScale = new Vector3(1.1f, 0.9f, 1f);
+            }
+            else if (Mathf.Abs(moveInput) > 0.1f)
+            {
+                targetScale = new Vector3(1.1f, 0.95f, 1f);
+            }
+            
+            transform.localScale = Vector3.Lerp(transform.localScale, targetScale, scaleSpeed * Time.deltaTime);
+        }
+    }
+    
+    void PlaySound(AudioClip clip)
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
+    
+    void SpawnEffect(GameObject prefab, Vector3 position)
+    {
+        if (prefab != null)
+        {
+            Instantiate(prefab, position, Quaternion.identity);
+        }
+    }
+    
+    public bool IsDashing() => isDashing;
+    public int GetDashCharges() => currentDashCharges;
+    
     void OnDrawGizmosSelected()
     {
+        // Ground check
         if (groundCheck != null)
         {
-            Gizmos.color = Color.red;
+            Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+        
+        // Wall checks
+        if (wallCheckLeft != null && enableWallSlide)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(wallCheckLeft.position, Vector2.left * wallCheckDistance);
+        }
+        
+        if (wallCheckRight != null && enableWallSlide)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(wallCheckRight.position, Vector2.right * wallCheckDistance);
         }
     }
 }

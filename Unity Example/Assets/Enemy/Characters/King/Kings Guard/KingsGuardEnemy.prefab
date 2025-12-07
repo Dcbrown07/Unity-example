@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 7389300226513337982}
   - component: {fileID: 2807401238330258536}
   - component: {fileID: -4444028040219766543}
-  - component: {fileID: -5763301806961514997}
   - component: {fileID: 133763375509054083}
   - component: {fileID: 6875589266103347003}
+  - component: {fileID: 4698253897546112340}
   m_Layer: 3
   m_Name: KingsGuardEnemy
   m_TagString: Enemy
@@ -37,6 +37,7 @@ Transform:
   m_Children:
   - {fileID: 5684935711207171025}
   - {fileID: 3494438525139248417}
+  - {fileID: 3038007184319882385}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7389300226513337982
@@ -161,48 +162,6 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 2.625, y: 3.75}
   m_Direction: 0
---- !u!114 &-5763301806961514997
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3079376822020254176}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a284cbe5f5bb4cb43a2e295cace9ba26, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SimpleEnemyAI
-  player: {fileID: 0}
-  animator: {fileID: 0}
-  rb: {fileID: 0}
-  moveSpeed: 3
-  stoppingDistance: 1.5
-  attackDistance: 2
-  groundCheck: {fileID: 5684935711207171025}
-  groundCheckRadius: 0.2
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  detectionRange: 10
-  attackDamage: 1
-  attackCooldown: 1.5
-  attackPoint: {fileID: 0}
-  attackRange: 2
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  attackDelay: 0.3
-  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  hitFlashDuration: 0.2
-  showHitText: 1
-  spriteRenderer: {fileID: 0}
-  flipSpriteToFacePlayer: 1
-  turnDelay: 0.3
-  requireMovementToTurn: 1
-  movementThreshold: 0.5
-  showGizmos: 1
-  showAttackDebug: 1
 --- !u!95 &133763375509054083
 Animator:
   serializedVersion: 7
@@ -257,6 +216,113 @@ MonoBehaviour:
   damageSound: {fileID: 0}
   deathSound: {fileID: 0}
   showDebugLogs: 1
+--- !u!114 &4698253897546112340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3079376822020254176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b946c47d01676cf4983f4a83c960c7ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  bossName: Kings Guard
+  healthSystem: {fileID: 0}
+  currentPhase: 0
+  phase1HealthThreshold: 35
+  phase2HealthThreshold: 15
+  player: {fileID: 0}
+  rb: {fileID: 0}
+  sprite: {fileID: 0}
+  animator: {fileID: 0}
+  arenaMinX: -10
+  arenaMaxX: 10
+  moveSpeed: 4
+  phase2SpeedMultiplier: 1.3
+  phase3SpeedMultiplier: 1.6
+  stoppingDistance: 2
+  attackPoint: {fileID: 3494438525139248417}
+  attackRange: 3
+  attackDamage: 2
+  attackCooldown: 1.2
+  dashAttackSpeed: 15
+  dashAttackRange: 8
+  dashAttackDamage: 3
+  dashAttackCooldown: 5
+  spinAttackDamage: 2
+  spinAttackRadius: 4
+  spinAttackCooldown: 7
+  shockwavePrefab: {fileID: 3706695259720370353}
+  shockwaveCooldown: 8
+  canBlock: 1
+  blockChance: 0.3
+  blockDuration: 1
+  blockCooldown: 3
+  phase1Color: {r: 1, g: 1, b: 1, a: 1}
+  phase2Color: {r: 1, g: 0.8, b: 0, a: 1}
+  phase3Color: {r: 1, g: 0, b: 0, a: 1}
+  blockColor: {r: 0, g: 1, b: 1, a: 1}
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  basicAttackSound: {fileID: 0}
+  dashAttackSound: {fileID: 0}
+  spinAttackSound: {fileID: 0}
+  blockSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  phaseChangeSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  hitEffect: {fileID: 0}
+  blockEffect: {fileID: 0}
+  phaseChangeEffect: {fileID: 0}
+  deathExplosion: {fileID: 0}
+--- !u!1 &3706695259720370353
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3038007184319882385}
+  - component: {fileID: 451892557036328462}
+  m_Layer: 0
+  m_Name: Shockwave
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3038007184319882385
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3706695259720370353}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.09482479, y: -0.35220265, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9036999141487849278}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &451892557036328462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3706695259720370353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a064ad9f8c38d6458e32469f912cedd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  speed: 8
+  lifetime: 3
+  damage: 2
 --- !u!1 &3825769828191912127
 GameObject:
   m_ObjectHideFlags: 0
