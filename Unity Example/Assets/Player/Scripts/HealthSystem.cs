@@ -133,6 +133,16 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isDead || isInvincible) return;
 
+        // CHECK FOR PARRY FIRST!
+        PlayerCombat2D combat = GetComponent<PlayerCombat2D>();
+        if (combat != null && combat.TryParry(Vector2.zero))
+        {
+            // Parry successful! No damage taken
+            if (showDebugLogs)
+                Debug.Log("<color=cyan>★ DAMAGE PARRIED!</color>");
+            return;
+        }
+
         currentHealth -= amount;
         currentHealth = Mathf.Max(0, currentHealth);
 

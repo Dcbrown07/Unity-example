@@ -64,6 +64,20 @@ public class PlayerController2D : MonoBehaviour
     private bool isGrounded;
     private bool wasGrounded;
     
+    [Header("Slope Handling")]
+    public bool enableSlopeHandling = true;
+    public float slopeCheckDistance = 0.6f;
+    public float maxSlopeAngle = 45f;
+    [Tooltip("Extra acceleration multiplier on slopes (increase if stuck)")]
+    public float slopeForceMultiplier = 3f;
+    private float slopeAngle;
+    private Vector2 slopeNormal;
+    private bool isOnSlope;
+    
+    [Header("IMPORTANT: Add Physics Material!")]
+    [Tooltip("Create Physics Material 2D with Friction=0, assign to Rigidbody2D")]
+    public bool needsPhysicsMaterial = true;
+    
     [Header("Fast Fall - Bullet Hell Dodge")]
     public bool enableFastFall = true;
     public float fastFallMultiplier = 2f;
@@ -128,6 +142,7 @@ public class PlayerController2D : MonoBehaviour
     void Update()
     {
         CheckGrounded();
+        CheckSlope();
         CheckWalls();
         HandleInput();
         HandleJump();
@@ -185,6 +200,32 @@ public class PlayerController2D : MonoBehaviour
         
         isTouchingWallLeft = Physics2D.Raycast(wallCheckLeft.position, Vector2.left, wallCheckDistance, wallLayer);
         isTouchingWallRight = Physics2D.Raycast(wallCheckRight.position, Vector2.right, wallCheckDistance, wallLayer);
+    }
+    
+    void CheckSlope()
+    {
+        if (!enableSlopeHandling || !isGrounded)
+        {
+            isOnSlope = false;
+            slopeAngle = 0f;
+            return;
+        }
+        
+        // Cast ray down to detect slope
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, slopeCheckDistance, groundLayer);
+        
+        if (hit)
+        {
+            slopeNormal = hit.normal;
+            slopeAngle = Vector2.Angle(slopeNormal, Vector2.up);
+            
+            isOnSlope = slopeAngle != 0f && slopeAngle <= maxSlopeAngle;
+        }
+        else
+        {
+            isOnSlope = false;
+            slopeAngle = 0f;
+        }
     }
     
     void HandleInput()
@@ -301,10 +342,14 @@ public class PlayerController2D : MonoBehaviour
         
         PlaySound(dashSound);
         
-        // Invincibility
+        // Invincibility - use layer check instead
         if (invincibleDuringDash && playerCollider != null)
         {
-            Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), true);
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (enemyLayer >= 0) // Only ignore if layer exists
+            {
+                Physics2D.IgnoreLayerCollision(gameObject.layer, enemyLayer, true);
+            }
         }
         
         // Dash trail
@@ -322,7 +367,11 @@ public class PlayerController2D : MonoBehaviour
         // Re-enable collisions
         if (invincibleDuringDash && playerCollider != null)
         {
-            Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), false);
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (enemyLayer >= 0) // Only re-enable if layer exists
+            {
+                Physics2D.IgnoreLayerCollision(gameObject.layer, enemyLayer, false);
+            }
         }
     }
     
@@ -406,6 +455,12 @@ public class PlayerController2D : MonoBehaviour
         if (isGrounded)
         {
             accelRate = isAccelerating ? acceleration : deceleration;
+            
+            // Add extra force on slopes
+            if (isOnSlope && isAccelerating && slopeAngle > 5f)
+            {
+                accelRate *= slopeForceMultiplier;
+            }
         }
         else
         {
@@ -418,7 +473,7 @@ public class PlayerController2D : MonoBehaviour
             }
         }
         
-        // Smooth movement
+        // Smooth movement - keep it simple!
         float newVelocityX = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accelRate * Time.fixedDeltaTime);
         rb.linearVelocity = new Vector2(newVelocityX, rb.linearVelocity.y);
     }
@@ -607,6 +662,17 @@ public class PlayerController2D : MonoBehaviour
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+        
+        // Slope check
+        if (enableSlopeHandling && Application.isPlaying && isOnSlope)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawRay(transform.position, Vector2.down * slopeCheckDistance);
+            
+            // Draw slope normal
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawRay(transform.position, slopeNormal * 2f);
         }
         
         // Wall checks

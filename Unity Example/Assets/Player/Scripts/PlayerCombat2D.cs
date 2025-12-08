@@ -13,6 +13,21 @@ public class PlayerCombat2D : MonoBehaviour
     [Header("Wand Settings")]
     public bool hasWand = false;
     public bool showWandVisuals = true;
+    
+    [Header("Wand Glow Effect")]
+    [Tooltip("Enable glowing outline on equipped wand")]
+    public bool enableWandGlow = true;
+    
+    [Tooltip("Wand glow color")]
+    public Color wandGlowColor = new Color(0.5f, 0.8f, 1f, 0.5f); // Blue glow
+    
+    [Tooltip("Glow pulse speed")]
+    public float wandGlowPulseSpeed = 3f;
+    
+    [Tooltip("Glow size")]
+    public float wandGlowSize = 1.4f;
+    
+    private GameObject wandGlowEffect;
 
     [Header("Fireball Settings")]
     public float fireballForce = 10f;
@@ -40,12 +55,23 @@ public class PlayerCombat2D : MonoBehaviour
     public float collisionRadius = 0.2f;
 
     [Header("Parry Settings")]
-    public float parryWindow = 0.3f;
-    public float parryCooldown = 1f;
+    public float parryWindow = 0.25f;
+    public float parryCooldown = 0.8f;
+    public float perfectParryWindow = 0.08f; // Perfect parry timing
     public float parrySlowmoScale = 0.3f;
-    public float parrySlowmoDuration = 0.2f;
+    public float parrySlowmoDuration = 0.3f;
+    public float parryKnockbackForce = 15f; // Force to launch enemies
+    public float perfectParryKnockbackForce = 25f; // Extra force for perfect parry
+    public float parryKnockbackRadius = 5f; // How far to check for enemies
+    public Color parryReadyColor = new Color(1f, 1f, 0f, 0.6f); // Yellow glow when ready
+    public Color parryActiveColor = new Color(0f, 1f, 1f, 1f); // Cyan when active
+    public Color perfectParryColor = new Color(1f, 0.5f, 0f, 1f); // Orange for perfect
     private bool isParrying = false;
+    private bool canParry = true;
     private float lastParryTime = -999f;
+    private float parryStartTime = 0f;
+    private GameObject parryIndicator;
+    private Vector2 lastDamageSource; // Track where damage came from
     
     [Header("Dash Settings")]
     public bool canDash = true;
@@ -125,6 +151,12 @@ public class PlayerCombat2D : MonoBehaviour
         }
 
         UpdateWandVisibility();
+        
+        // Create wand glow effect
+        if (enableWandGlow && wand != null)
+        {
+            CreateWandGlow();
+        }
     }
 
     void Update()
@@ -139,6 +171,13 @@ public class PlayerCombat2D : MonoBehaviour
 
         HandleParry();
         HandleDash();
+        UpdateParryIndicator();
+        
+        // Update wand glow
+        if (enableWandGlow && wandGlowEffect != null && hasWand && showWandVisuals)
+        {
+            UpdateWandGlow();
+        }
         
         // Reduce kickback
         currentKickback = Mathf.Lerp(currentKickback, 0f, 10f * Time.deltaTime);
@@ -149,6 +188,11 @@ public class PlayerCombat2D : MonoBehaviour
         if (wand != null)
         {
             wand.gameObject.SetActive(hasWand && showWandVisuals);
+        }
+        
+        if (wandGlowEffect != null)
+        {
+            wandGlowEffect.SetActive(hasWand && showWandVisuals && enableWandGlow);
         }
     }
 
@@ -278,14 +322,12 @@ public class PlayerCombat2D : MonoBehaviour
 
         nextFireTime = Time.time + fireRate;
 
-        Vector3 mouseScreenPos = Input.mousePosition;
-        Vector3 screenCenter = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
-        Vector3 mouseOffset = mouseScreenPos - screenCenter;
-        Vector3 worldOffset = cam.ScreenToWorldPoint(screenCenter + mouseOffset) 
-                            - cam.ScreenToWorldPoint(screenCenter);
-
+        // Get mouse position in world space
+        Vector3 mouseWorldPos = cam.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorldPos.z = 0;
+        
         Vector2 wandPos = wand.position;
-        Vector2 shootDirection = worldOffset.normalized;
+        Vector2 shootDirection = ((Vector2)mouseWorldPos - wandPos).normalized;
         Vector2 spawnPos = wandPos + shootDirection * 0.3f;
 
         GameObject fireball = Instantiate(fireballPrefab, spawnPos, Quaternion.identity);
@@ -297,11 +339,11 @@ public class PlayerCombat2D : MonoBehaviour
             fireball.transform.localScale *= 1f + powerMultiplier * 0.5f;
         }
 
-        Rigidbody2D rb = fireball.GetComponent<Rigidbody2D>();
-        if (rb != null)
+        Rigidbody2D fireballRb = fireball.GetComponent<Rigidbody2D>();
+        if (fireballRb != null)
         {
-            rb.linearVelocity = Vector2.zero;
-            rb.AddForce(shootDirection * fireballForce * powerMultiplier, ForceMode2D.Impulse);
+            fireballRb.gravityScale = 0f; // DISABLE GRAVITY!
+            fireballRb.linearVelocity = shootDirection * fireballForce * powerMultiplier;
         }
 
         // Increase fireball damage if charged
@@ -414,31 +456,160 @@ public class PlayerCombat2D : MonoBehaviour
 
     void HandleParry()
     {
-        if (Input.GetMouseButtonDown(1) && Time.time >= lastParryTime + parryCooldown)
+        if (Input.GetMouseButtonDown(1) && canParry && Time.time >= lastParryTime + parryCooldown)
         {
             lastParryTime = Time.time;
             StartCoroutine(Parry());
+        }
+    }
+    
+    void UpdateParryIndicator()
+    {
+        // Create parry indicator if it doesn't exist
+        if (parryIndicator == null)
+        {
+            parryIndicator = new GameObject("ParryIndicator");
+            parryIndicator.transform.parent = transform;
+            parryIndicator.transform.localPosition = Vector3.up * 0.8f;
+            
+            SpriteRenderer sr = parryIndicator.AddComponent<SpriteRenderer>();
+            Texture2D tex = new Texture2D(16, 16);
+            for (int y = 0; y < 16; y++)
+            {
+                for (int x = 0; x < 16; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(8, 8));
+                    if (dist < 7 && dist > 5)
+                    {
+                        tex.SetPixel(x, y, Color.white);
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+            tex.Apply();
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f));
+            sr.sortingOrder = 100;
+        }
+        
+        SpriteRenderer indicatorSr = parryIndicator.GetComponent<SpriteRenderer>();
+        
+        if (isParrying)
+        {
+            // Active parry - pulse cyan
+            float pulseSpeed = 20f;
+            float pulse = (Mathf.Sin(Time.time * pulseSpeed) + 1f) * 0.5f;
+            indicatorSr.color = Color.Lerp(parryActiveColor, perfectParryColor, pulse);
+            
+            // Scale pulse
+            float scale = 0.3f + pulse * 0.2f;
+            parryIndicator.transform.localScale = Vector3.one * scale;
+        }
+        else if (canParry && Time.time >= lastParryTime + parryCooldown)
+        {
+            // Ready to parry - gentle yellow pulse
+            float pulseSpeed = 3f;
+            float pulse = (Mathf.Sin(Time.time * pulseSpeed) + 1f) * 0.5f;
+            indicatorSr.color = Color.Lerp(Color.clear, parryReadyColor, pulse);
+            parryIndicator.transform.localScale = Vector3.one * 0.25f;
+        }
+        else
+        {
+            // On cooldown - fade out
+            float cooldownProgress = (Time.time - lastParryTime) / parryCooldown;
+            indicatorSr.color = Color.Lerp(Color.clear, parryReadyColor, cooldownProgress * 0.3f);
+            parryIndicator.transform.localScale = Vector3.one * 0.2f;
         }
     }
 
     IEnumerator Parry()
     {
         isParrying = true;
+        canParry = false;
+        parryStartTime = Time.time;
+        
         PlaySound(parrySound);
         
-        // Visual flash
-        if (playerSprite != null)
-        {
-            StartCoroutine(ParryFlash());
-        }
+        // Visual feedback - shield flash around player
+        StartCoroutine(ParryShield());
         
         // Particle burst
         StartCoroutine(ParryBurst(transform.position));
         
-        Debug.Log("<color=cyan>★ PARRY!</color>");
+        Debug.Log("<color=cyan>★ PARRY ACTIVE!</color>");
         
+        // Wait for parry window
         yield return new WaitForSeconds(parryWindow);
+        
         isParrying = false;
+        
+        // Cooldown
+        yield return new WaitForSeconds(parryCooldown - parryWindow);
+        canParry = true;
+    }
+    
+    IEnumerator ParryShield()
+    {
+        GameObject shield = new GameObject("ParryShield");
+        shield.transform.position = transform.position;
+        shield.transform.parent = transform;
+        
+        SpriteRenderer sr = shield.AddComponent<SpriteRenderer>();
+        Texture2D tex = new Texture2D(64, 64);
+        
+        // Create shield circle
+        for (int y = 0; y < 64; y++)
+        {
+            for (int x = 0; x < 64; x++)
+            {
+                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(32, 32));
+                if (dist < 30 && dist > 24)
+                {
+                    float alpha = 1f - (dist - 24f) / 6f;
+                    tex.SetPixel(x, y, new Color(0f, 1f, 1f, alpha * 0.6f));
+                }
+                else
+                {
+                    tex.SetPixel(x, y, Color.clear);
+                }
+            }
+        }
+        tex.Apply();
+        sr.sprite = Sprite.Create(tex, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
+        sr.sortingOrder = 99;
+        
+        // Animate shield
+        float elapsed = 0f;
+        Vector3 startScale = Vector3.one * 0.5f;
+        Vector3 endScale = Vector3.one * 1.2f;
+        
+        while (elapsed < parryWindow)
+        {
+            float t = elapsed / parryWindow;
+            shield.transform.localScale = Vector3.Lerp(startScale, endScale, t);
+            shield.transform.Rotate(0, 0, 360f * Time.deltaTime * 2f);
+            
+            // Pulse color
+            float pulse = Mathf.Sin(elapsed * 30f);
+            Color pulseColor = pulse > 0 ? parryActiveColor : perfectParryColor;
+            sr.color = Color.Lerp(sr.color, pulseColor, Time.deltaTime * 10f);
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Fade out
+        elapsed = 0f;
+        while (elapsed < 0.2f)
+        {
+            sr.color = Color.Lerp(sr.color, Color.clear, elapsed / 0.2f);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        Destroy(shield);
     }
 
     IEnumerator ParryFlash()
@@ -446,7 +617,7 @@ public class PlayerCombat2D : MonoBehaviour
         Color original = playerSprite.color;
         for (int i = 0; i < 3; i++)
         {
-            playerSprite.color = Color.cyan;
+            playerSprite.color = parryActiveColor;
             yield return new WaitForSeconds(0.05f);
             playerSprite.color = original;
             yield return new WaitForSeconds(0.05f);
@@ -455,21 +626,140 @@ public class PlayerCombat2D : MonoBehaviour
 
     IEnumerator ParryBurst(Vector3 position)
     {
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 12; i++)
         {
             GameObject particle = new GameObject("ParryParticle");
             particle.transform.position = position;
             
             SpriteRenderer sr = particle.AddComponent<SpriteRenderer>();
-            Texture2D tex = new Texture2D(4, 4);
-            for (int p = 0; p < 16; p++) tex.SetPixel(p % 4, p / 4, Color.cyan);
+            Texture2D tex = new Texture2D(6, 6);
+            for (int p = 0; p < 36; p++) 
+            {
+                float dist = Vector2.Distance(new Vector2(p % 6, p / 6), new Vector2(3, 3));
+                tex.SetPixel(p % 6, p / 6, dist < 3 ? parryActiveColor : Color.clear);
+            }
             tex.Apply();
-            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 6, 6), new Vector2(0.5f, 0.5f));
+            sr.sortingOrder = 100;
             
-            Vector2 dir = Random.insideUnitCircle.normalized;
-            StartCoroutine(MoveAndFadeParticle(particle, dir, 3f, 0.5f));
+            float angle = (360f / 12f) * i;
+            Vector2 dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            StartCoroutine(MoveAndFadeParticle(particle, dir, 5f, 0.4f));
         }
         yield return null;
+    }
+    
+    // Public method to check if damage should be blocked
+    public bool TryParry(Vector2 damageSource)
+    {
+        if (!isParrying) return false;
+        
+        // Store damage source for knockback direction
+        lastDamageSource = damageSource;
+        
+        // Check if within parry window
+        float timeSinceParryStart = Time.time - parryStartTime;
+        bool isPerfectParry = timeSinceParryStart <= perfectParryWindow;
+        
+        // Successful parry!
+        StartCoroutine(ParrySuccess(isPerfectParry));
+        
+        return true;
+    }
+    
+    IEnumerator ParrySuccess(bool isPerfect)
+    {
+        float knockbackForce = isPerfect ? perfectParryKnockbackForce : parryKnockbackForce;
+        
+        // Launch nearby enemies backwards
+        LaunchEnemiesBack(knockbackForce);
+        
+        if (isPerfect)
+        {
+            Debug.Log("<color=orange>★★★ PERFECT PARRY! ★★★</color>");
+            
+            // Perfect parry effects
+            Time.timeScale = parrySlowmoScale;
+            StartCoroutine(ScreenShake(0.3f, 0.2f));
+            
+            // Massive burst
+            for (int i = 0; i < 24; i++)
+            {
+                GameObject particle = new GameObject("PerfectParryParticle");
+                particle.transform.position = transform.position;
+                
+                SpriteRenderer sr = particle.AddComponent<SpriteRenderer>();
+                Texture2D tex = new Texture2D(8, 8);
+                for (int p = 0; p < 64; p++) 
+                {
+                    tex.SetPixel(p % 8, p / 8, perfectParryColor);
+                }
+                tex.Apply();
+                sr.sprite = Sprite.Create(tex, new Rect(0, 0, 8, 8), new Vector2(0.5f, 0.5f));
+                sr.sortingOrder = 101;
+                
+                float angle = (360f / 24f) * i;
+                Vector2 dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+                StartCoroutine(MoveAndFadeParticle(particle, dir, 8f, 0.6f));
+            }
+            
+            yield return new WaitForSecondsRealtime(parrySlowmoDuration);
+            Time.timeScale = 1f;
+        }
+        else
+        {
+            Debug.Log("<color=cyan>★ Good Parry!</color>");
+            StartCoroutine(ScreenShake(0.15f, 0.1f));
+        }
+    }
+    
+    void LaunchEnemiesBack(float force)
+    {
+        // Find all enemies in range
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, parryKnockbackRadius, enemyLayer);
+        
+        foreach (Collider2D hit in hits)
+        {
+            // Calculate knockback direction (away from player)
+            Vector2 knockbackDir = ((Vector2)hit.transform.position - (Vector2)transform.position).normalized;
+            
+            // Try to apply knockback to different enemy types
+            Rigidbody2D enemyRb = hit.GetComponent<Rigidbody2D>();
+            if (enemyRb != null)
+            {
+                // Direct physics knockback
+                enemyRb.linearVelocity = Vector2.zero; // Reset velocity first
+                enemyRb.AddForce(knockbackDir * force, ForceMode2D.Impulse);
+                Debug.Log($"<color=cyan>Launched {hit.name} backwards!</color>");
+            }
+            
+            // Also try calling TakeDamage with knockback for enemies that have it
+            var enemyHealth = hit.GetComponent<EnemyHealth>();
+            if (enemyHealth != null)
+            {
+                // Don't damage, just knockback
+                enemyHealth.TakeDamage(0, knockbackDir * force);
+            }
+            
+            var simpleEnemy = hit.GetComponent<SimpleEnemy>();
+            if (simpleEnemy != null)
+            {
+                simpleEnemy.TakeDamage(0, knockbackDir * force);
+            }
+            
+            // For bosses, apply force directly
+            var kingsGuard = hit.GetComponent<KingsGuardBoss>();
+            if (kingsGuard != null && enemyRb != null)
+            {
+                Debug.Log($"<color=orange>Parried Kings Guard - launching back!</color>");
+            }
+            
+            var swampMonster = hit.GetComponent<SwampMonsterBoss>();
+            if (swampMonster != null && enemyRb != null)
+            {
+                Debug.Log($"<color=green>Parried Swamp Monster - launching back!</color>");
+            }
+        }
     }
 
     void HandleDash()
@@ -743,6 +1033,68 @@ public class PlayerCombat2D : MonoBehaviour
 
     public bool IsParrying() => isParrying;
     public bool IsDashing() => isDashing;
+    
+    void CreateWandGlow()
+    {
+        if (wand == null) return;
+        
+        wandGlowEffect = new GameObject("WandGlow");
+        wandGlowEffect.transform.parent = wand;
+        wandGlowEffect.transform.localPosition = Vector3.zero;
+        wandGlowEffect.transform.localRotation = Quaternion.identity;
+        
+        SpriteRenderer glowSr = wandGlowEffect.AddComponent<SpriteRenderer>();
+        
+        // Create circular glow sprite
+        int resolution = 64;
+        Texture2D glowTex = new Texture2D(resolution, resolution);
+        
+        for (int y = 0; y < resolution; y++)
+        {
+            for (int x = 0; x < resolution; x++)
+            {
+                Vector2 center = new Vector2(resolution / 2f, resolution / 2f);
+                float distance = Vector2.Distance(new Vector2(x, y), center);
+                float maxDist = resolution / 2f;
+                
+                // Soft gradient from center
+                float alpha = 1f - (distance / maxDist);
+                alpha = Mathf.Clamp01(alpha);
+                alpha = Mathf.Pow(alpha, 2f); // Stronger falloff
+                
+                Color pixelColor = new Color(wandGlowColor.r, wandGlowColor.g, wandGlowColor.b, alpha * wandGlowColor.a);
+                glowTex.SetPixel(x, y, pixelColor);
+            }
+        }
+        
+        glowTex.Apply();
+        glowSr.sprite = Sprite.Create(glowTex, new Rect(0, 0, resolution, resolution), new Vector2(0.5f, 0.5f), 50f);
+        glowSr.sortingOrder = wandSprite != null ? wandSprite.sortingOrder - 1 : -1;
+    }
+    
+    void UpdateWandGlow()
+    {
+        if (wandGlowEffect == null || wand == null) return;
+        
+        // Pulse effect
+        float pulse = (Mathf.Sin(Time.time * wandGlowPulseSpeed) + 1f) * 0.5f;
+        float scale = wandGlowSize + (pulse * 0.3f);
+        
+        wandGlowEffect.transform.localScale = Vector3.one * scale;
+        
+        // Update position and rotation to follow wand
+        wandGlowEffect.transform.position = wand.position;
+        wandGlowEffect.transform.rotation = wand.rotation;
+        
+        // Pulse alpha
+        SpriteRenderer sr = wandGlowEffect.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            Color color = wandGlowColor;
+            color.a = wandGlowColor.a * (0.3f + pulse * 0.7f);
+            sr.color = color;
+        }
+    }
 
     void OnDrawGizmosSelected()
     {

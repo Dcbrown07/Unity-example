@@ -77,6 +77,17 @@ public class PongOrb : MonoBehaviour
             {
                 Physics2D.IgnoreCollision(myCollider, ownerCollider, true);
             }
+            
+            // Also ignore player's wand
+            PlayerCombat2D playerCombat = owner.GetComponent<PlayerCombat2D>();
+            if (playerCombat != null && playerCombat.wand != null)
+            {
+                Collider2D wandCollider = playerCombat.wand.GetComponent<Collider2D>();
+                if (wandCollider != null && myCollider != null)
+                {
+                    Physics2D.IgnoreCollision(myCollider, wandCollider, true);
+                }
+            }
         }
 
         UpdateVisuals();

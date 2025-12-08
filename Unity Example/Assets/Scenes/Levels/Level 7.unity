@@ -3082,6 +3082,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: KingsGuardEnemy
       objectReference: {fileID: 0}
+    - target: {fileID: 3079376822020254176, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
       propertyPath: arenaMaxX
       value: 20
@@ -3089,6 +3093,18 @@ PrefabInstance:
     - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
       propertyPath: arenaMinX
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: bossMaxHealth
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: phase1HealthThreshold
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: phase2HealthThreshold
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 9036999141487849278, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4484,6 +4500,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 553833880501904568, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: jumpForce
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 553833880501904568, guid: d956319ef258e834990185570c7f8339, type: 3}
       propertyPath: enableWallSlide
       value: 0

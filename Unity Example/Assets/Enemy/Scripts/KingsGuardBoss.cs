@@ -9,6 +9,9 @@ public class KingsGuardBoss : MonoBehaviour
     [Header("Health")]
     public EnemyHealth healthSystem; // Use existing EnemyHealth component
     
+    [Tooltip("Boss max health")]
+    public int bossMaxHealth = 50;
+    
     public enum BossPhase { Phase1_Aggressive, Phase2_Defensive, Phase3_Berserk }
     
     [Header("Phase System")]
@@ -105,7 +108,7 @@ public class KingsGuardBoss : MonoBehaviour
         }
         
         // Configure health system for boss BEFORE it initializes
-        healthSystem.maxHealth = 50;
+        healthSystem.maxHealth = bossMaxHealth;
         healthSystem.hasShield = true;
         healthSystem.blockChanceAtFullHealth = 0.2f;
         healthSystem.blockChanceAtLowHealth = 0.5f;
@@ -696,5 +699,22 @@ public class KingsGuardBoss : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(new Vector3(arenaMinX, transform.position.y, 0), 
                        new Vector3(arenaMaxX, transform.position.y, 0));
+    }
+    
+    // Public accessors for boss health
+    public int GetCurrentHealth()
+    {
+        return healthSystem != null ? healthSystem.GetHealth() : 0;
+    }
+    
+    public int GetMaxHealth()
+    {
+        return bossMaxHealth;
+    }
+    
+    public float GetHealthPercent()
+    {
+        if (healthSystem == null) return 0f;
+        return (float)healthSystem.GetHealth() / bossMaxHealth;
     }
 }

@@ -183,10 +183,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SimpleCameraFollow
   target: {fileID: 2864174771948869176}
   smoothSpeed: 1
-  verticalSmoothSpeed: 5
+  verticalSmoothSpeed: 10
   offset: {x: 5, y: 5, z: 0}
   usePrediction: 1
-  predictionAmount: 0.5
+  predictionAmount: 0.2
   cameraSize: 8.05
   smoothZoom: 1
   zoomSpeed: 5
@@ -217,6 +217,7 @@ GameObject:
   - component: {fileID: 6980943678482996010}
   - component: {fileID: 2994518636426514963}
   - component: {fileID: 5796864870690604440}
+  - component: {fileID: 6628514027751848818}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -319,7 +320,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 5
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: e9e18eed906491e41a6358d7df4141a0, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -381,6 +382,11 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 4294967295
+  enableSlopeHandling: 1
+  slopeCheckDistance: 0.6
+  maxSlopeAngle: 45
+  slopeForceMultiplier: 2
+  needsPhysicsMaterial: 1
   enableFastFall: 1
   fastFallMultiplier: 2
   enableSquashStretch: 1
@@ -533,6 +539,10 @@ MonoBehaviour:
   playerSprite: {fileID: 0}
   hasWand: 1
   showWandVisuals: 1
+  enableWandGlow: 1
+  wandGlowColor: {r: 0.5, g: 0.8, b: 1, a: 0.5}
+  wandGlowPulseSpeed: 3
+  wandGlowSize: 1.4
   fireballForce: 10
   fireballDamage: 1
   manaCostPerShot: 20
@@ -550,8 +560,12 @@ MonoBehaviour:
   collisionRadius: 0.3
   parryWindow: 0.3
   parryCooldown: 1
+  perfectParryWindow: 0.08
   parrySlowmoScale: 0.3
   parrySlowmoDuration: 0.2
+  parryReadyColor: {r: 1, g: 1, b: 0, a: 0.6}
+  parryActiveColor: {r: 0, g: 1, b: 1, a: 1}
+  perfectParryColor: {r: 1, g: 0.5, b: 0, a: 1}
   canDash: 1
   dashSpeed: 20
   dashDuration: 0.15
@@ -695,6 +709,18 @@ MonoBehaviour:
   maxGlowIntensity: 1.5
   outOfManaSound: {fileID: 0}
   lowManaWarningSound: {fileID: 0}
+--- !u!114 &6628514027751848818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4202892009642581899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76b1647bb9448ba4589467f229039c84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVisibility
 --- !u!1 &4643864467780023090
 GameObject:
   m_ObjectHideFlags: 0
@@ -719,13 +745,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4643864467780023090}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: 0.09953069, w: 0.9950345}
-  m_LocalPosition: {x: 0.25, y: 0.436, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: 0.25650308, w: 0.96654344}
+  m_LocalPosition: {x: 0.4869998, y: 0.37999997, z: 0}
   m_LocalScale: {x: 5.5272927, y: 1.7334263, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5672256301309360033}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 29.725}
 --- !u!1 &6561334603947234297
 GameObject:
   m_ObjectHideFlags: 0
