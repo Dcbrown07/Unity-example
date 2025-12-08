@@ -238,44 +238,47 @@ public class PlayerCombat2D : MonoBehaviour
     {
         if (!canChargeShot) return;
         
-        // Start charging
+        // Start charging - CHECK MANA FIRST
         if (Input.GetMouseButton(0) && Time.time >= nextFireTime)
         {
             if (!isCharging)
             {
+                // Check if we have enough mana for at least a basic shot
+                if (manaSystem != null && !manaSystem.HasMana(manaCostPerShot))
+                {
+                    Debug.Log("<color=red>Not enough mana to charge shot!</color>");
+                    return; // Don't start charging if not enough mana
+                }
+                
                 isCharging = true;
                 currentCharge = 0f;
                 
-                // Spawn charge effect
-                if (chargeEffectPrefab != null && wand != null)
+                // Debug positions
+                Debug.Log($"<color=yellow>PLAYER at: {transform.position}, WAND at: {(wand != null ? wand.position.ToString() : "NULL")}</color>");
+                
+                // Play charge sound at start
+                if (chargeSound != null && audioSource != null)
                 {
-                    activeChargeEffect = Instantiate(chargeEffectPrefab, wand.position, Quaternion.identity, wand);
+                    audioSource.pitch = 1f;
+                    audioSource.PlayOneShot(chargeSound);
+                    Debug.Log("<color=orange>Charging started!</color>");
                 }
-                else if (wand != null)
-                {
-                    // Create inline charge effect without separate script
-                    activeChargeEffect = new GameObject("ChargeEffect");
-                    activeChargeEffect.transform.parent = wand;
-                    activeChargeEffect.transform.localPosition = Vector3.zero;
-                    StartCoroutine(AnimateChargeEffect(activeChargeEffect));
-                }
+                
+                // Always create procedural charge effect
+                activeChargeEffect = new GameObject("ChargeEffect");
+                activeChargeEffect.transform.parent = wand;
+                activeChargeEffect.transform.localPosition = Vector3.zero;
+                StartCoroutine(AnimateChargeEffect(activeChargeEffect));
             }
             
             // Charge up
             currentCharge += Time.deltaTime / chargeTime;
             currentCharge = Mathf.Clamp01(currentCharge);
             
-            // Visual feedback
+            // Visual feedback - wand color
             if (wandSprite != null)
             {
                 wandSprite.color = Color.Lerp(originalWandColor, chargeColor, currentCharge);
-            }
-            
-            // Sound (pitch increases with charge)
-            if (currentCharge > 0.1f && chargeSound != null && !audioSource.isPlaying)
-            {
-                audioSource.pitch = 0.5f + currentCharge * 0.5f;
-                audioSource.PlayOneShot(chargeSound);
             }
         }
     }
@@ -285,28 +288,31 @@ public class PlayerCombat2D : MonoBehaviour
         if (!hasWand) return;
 
         // Release charged shot
-        if (Input.GetMouseButtonUp(0) && isCharging)
+        if (Input.GetMouseButtonUp(0))
         {
-            ShootFireball(1f + currentCharge * (maxChargeMultiplier - 1f), currentCharge >= 1f);
-            
-            isCharging = false;
-            currentCharge = 0f;
-            
-            if (wandSprite != null)
+            if (isCharging)
             {
-                wandSprite.color = originalWandColor;
+                // Fire charged shot
+                ShootFireball(1f + currentCharge * (maxChargeMultiplier - 1f), currentCharge >= 1f);
+                
+                isCharging = false;
+                currentCharge = 0f;
+                
+                if (wandSprite != null)
+                {
+                    wandSprite.color = originalWandColor;
+                }
+                
+                if (activeChargeEffect != null)
+                {
+                    Destroy(activeChargeEffect);
+                }
             }
-            
-            if (activeChargeEffect != null)
+            else if (Time.time >= nextFireTime)
             {
-                Destroy(activeChargeEffect);
+                // Quick tap - fire normal shot
+                ShootFireball(1f, false);
             }
-        }
-        // Quick tap for normal shot (only if not charging)
-        else if (Input.GetMouseButtonUp(0) && !isCharging && Time.time >= nextFireTime)
-        {
-            // Check if it was a quick tap (released within 0.1s)
-            ShootFireball(1f, false);
         }
     }
 
@@ -934,43 +940,97 @@ public class PlayerCombat2D : MonoBehaviour
     
     IEnumerator AnimateChargeEffect(GameObject effect)
     {
-        // Create orbiting particles
-        int particleCount = 8;
-        GameObject[] particles = new GameObject[particleCount];
-        float[] angles = new float[particleCount];
-        
-        for (int i = 0; i < particleCount; i++)
+        if (wand == null)
         {
-            particles[i] = new GameObject("ChargeParticle");
-            particles[i].transform.parent = effect.transform;
-            
-            SpriteRenderer sr = particles[i].AddComponent<SpriteRenderer>();
-            Texture2D tex = new Texture2D(6, 6);
-            for (int p = 0; p < 36; p++)
-            {
-                float dist = Vector2.Distance(new Vector2(p % 6, p / 6), new Vector2(3, 3));
-                tex.SetPixel(p % 6, p / 6, dist < 3 ? chargeColor : Color.clear);
-            }
-            tex.Apply();
-            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 6, 6), new Vector2(0.5f, 0.5f));
-            
-            angles[i] = (360f / particleCount) * i;
+            Debug.LogError("Wand is null!");
+            yield break;
         }
         
-        // Animate particles orbiting
-        while (effect != null)
+        Debug.Log($"<color=yellow>Starting charge effect at wand position: {wand.position}</color>");
+        
+        // Create 8 orbiting particles
+        GameObject[] particles = new GameObject[8];
+        float[] angles = new float[8];
+        
+        for (int i = 0; i < 8; i++)
         {
-            for (int i = 0; i < particleCount; i++)
+            // Create particle with NO parent
+            particles[i] = new GameObject($"ChargeOrb_{i}");
+            
+            // Add sprite renderer
+            SpriteRenderer sr = particles[i].AddComponent<SpriteRenderer>();
+            
+            // Create medium-sized orange circle texture
+            Texture2D tex = new Texture2D(16, 16);
+            for (int y = 0; y < 16; y++)
+            {
+                for (int x = 0; x < 16; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(8, 8));
+                    Color col = dist < 6 ? new Color(1f, 0.6f, 0f, 1f) : Color.clear;
+                    tex.SetPixel(x, y, col);
+                }
+            }
+            tex.Apply();
+            
+            // Create sprite - 50 pixels per unit gives good size
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 50f);
+            
+            // Don't scale - let pixels per unit control size
+            particles[i].transform.localScale = Vector3.one;
+            
+            // MATCH PLAYER'S SORTING LAYER
+            if (playerSprite != null)
+            {
+                sr.sortingLayerName = playerSprite.sortingLayerName;
+                sr.sortingOrder = playerSprite.sortingOrder + 10;
+            }
+            else
+            {
+                sr.sortingOrder = 999;
+            }
+            
+            // Initial angle
+            angles[i] = (360f / 8f) * i;
+        }
+        
+        Debug.Log("<color=green>Created 8 charge orbs!</color>");
+        
+        // Animate orbit
+        while (isCharging && wand != null)
+        {
+            Vector3 wandPos = wand.position;
+            
+            for (int i = 0; i < 8; i++)
             {
                 if (particles[i] == null) continue;
                 
+                // Rotate angle
                 angles[i] += 360f * Time.deltaTime;
                 float rad = angles[i] * Mathf.Deg2Rad;
                 
-                Vector2 pos = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * 0.3f;
-                particles[i].transform.localPosition = pos;
+                // Calculate orbit position
+                float radius = 0.4f;
+                float offsetX = Mathf.Cos(rad) * radius;
+                float offsetY = Mathf.Sin(rad) * radius;
+                
+                // Set world position directly
+                particles[i].transform.position = new Vector3(
+                    wandPos.x + offsetX,
+                    wandPos.y + offsetY,
+                    wandPos.z
+                );
             }
+            
             yield return null;
+        }
+        
+        Debug.Log("<color=red>Cleaning up charge orbs</color>");
+        
+        // Destroy particles
+        foreach (GameObject p in particles)
+        {
+            if (p != null) Destroy(p);
         }
     }
 

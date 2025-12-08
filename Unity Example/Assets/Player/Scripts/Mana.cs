@@ -157,6 +157,11 @@ public class PlayerMana : MonoBehaviour
             return false;
         }
     }
+    
+    public bool HasMana(float amount)
+    {
+        return currentMana >= amount;
+    }
 
     void OnOutOfMana()
     {

@@ -2817,7 +2817,7 @@ Transform:
   m_GameObject: {fileID: 573409244}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -17.71, y: -1.532, z: 0}
+  m_LocalPosition: {x: -17.71, y: -1.505, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4637,7 +4637,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2864174771948869176, guid: d956319ef258e834990185570c7f8339, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.444
+      value: -1.216
       objectReference: {fileID: 0}
     - target: {fileID: 2864174771948869176, guid: d956319ef258e834990185570c7f8339, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4684,8 +4684,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 905667481}
     - target: {fileID: 4329393064971358885, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: shootSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 2acf2c92137315d4e8fd8aa3fc2ddb0e, type: 3}
+    - target: {fileID: 4329393064971358885, guid: d956319ef258e834990185570c7f8339, type: 3}
       propertyPath: fireballDamage
-      value: 3
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4329393064971358885, guid: d956319ef258e834990185570c7f8339, type: 3}
+      propertyPath: enemyLayer.m_Bits
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4815,7 +4823,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 2b1c45253001adb459d3fd46fa335d86, type: 3}
+  m_Resource: {fileID: 8300000, guid: 954b764763db2ea43a9317bd2484ec86, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -5047,7 +5055,7 @@ Transform:
   m_GameObject: {fileID: 926355156}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -4.31, z: 0}
+  m_LocalPosition: {x: 0, y: -4.21, z: 0}
   m_LocalScale: {x: 45, y: 4.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6127,7 +6135,7 @@ Transform:
   m_GameObject: {fileID: 1114607793}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.96, y: -1.58, z: 0}
+  m_LocalPosition: {x: -5.96, y: -1.54, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8483,7 +8491,8 @@ PrefabInstance:
       value: PathfindingGrid
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 5712283086505803484, guid: 33080edf4e250f54981c3ce0ad7c6f0c, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 33080edf4e250f54981c3ce0ad7c6f0c, type: 3}
@@ -10770,9 +10779,37 @@ PrefabInstance:
       value: KingsGuardEnemy
       objectReference: {fileID: 0}
     - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: hurtSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 579fd7a34f174c840af7782491998308, type: 3}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: blockSound
+      value: 
+      objectReference: {fileID: 8300000, guid: aa016d3f3f8f8c248b126a4f54d5b32a, type: 3}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: deathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: e992624f4ee6533448b7f140811487b4, type: 3}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
       propertyPath: bossMaxHealth
       value: 25
       objectReference: {fileID: 0}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: dashAttackSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 45c09a96b13e5634eb6a2fb52552ab8f, type: 3}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: spinAttackSound
+      value: 
+      objectReference: {fileID: 8300000, guid: bee21a0572cc0874e913976905bcf4b4, type: 3}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: basicAttackSound
+      value: 
+      objectReference: {fileID: 8300000, guid: e735c50c93d27004db997911f761309b, type: 3}
+    - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
+      propertyPath: phaseChangeSound
+      value: 
+      objectReference: {fileID: 8300000, guid: b68b2f1a8a5d0c8478a349779bd34bce, type: 3}
     - target: {fileID: 4698253897546112340, guid: 9eeb9d6bcda9f2748a22769dcd17e26b, type: 3}
       propertyPath: phase1HealthThreshold
       value: 15

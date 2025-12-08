@@ -392,12 +392,12 @@ MonoBehaviour:
   enableSquashStretch: 1
   scaleSpeed: 20
   dashTrailPrefab: {fileID: 0}
-  landingDustPrefab: {fileID: 0}
-  jumpDustPrefab: {fileID: 0}
+  landingDustPrefab: {fileID: 8233427176916133472, guid: f991ec86711fcbc49a4bf4e781839094, type: 3}
+  jumpDustPrefab: {fileID: 6810272739992433076}
   wallSlideDustPrefab: {fileID: 0}
-  jumpSound: {fileID: 0}
+  jumpSound: {fileID: 8300000, guid: a0398ba9533b1304c88f25f25479c194, type: 3}
   dashSound: {fileID: 0}
-  landSound: {fileID: 0}
+  landSound: {fileID: 8300000, guid: e2523c6fd5d51e4408f1bfbfdf5c7342, type: 3}
   wallSlideSound: {fileID: 0}
   enableInputBuffer: 1
   inputBufferTime: 0.1
@@ -563,6 +563,9 @@ MonoBehaviour:
   perfectParryWindow: 0.08
   parrySlowmoScale: 0.3
   parrySlowmoDuration: 0.2
+  parryKnockbackForce: 15
+  perfectParryKnockbackForce: 25
+  parryKnockbackRadius: 5
   parryReadyColor: {r: 1, g: 1, b: 0, a: 0.6}
   parryActiveColor: {r: 0, g: 1, b: 1, a: 1}
   perfectParryColor: {r: 1, g: 0.5, b: 0, a: 1}
@@ -578,10 +581,10 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
-  shootSound: {fileID: 0}
-  chargeSound: {fileID: 0}
-  parrySound: {fileID: 0}
-  dashSound: {fileID: 0}
+  shootSound: {fileID: 8300000, guid: f7ef2fa267735db46bca7db1b9ebce60, type: 3}
+  chargeSound: {fileID: 8300000, guid: d75b9cc390481044798c63d4d1bebd87, type: 3}
+  parrySound: {fileID: 8300000, guid: e8f23014ee33c1941ba5875afa9fabfc, type: 3}
+  dashSound: {fileID: 8300000, guid: 45c09a96b13e5634eb6a2fb52552ab8f, type: 3}
   meleeSound: {fileID: 0}
   screenShakeOnShoot: 1
   shootShakeIntensity: 0.1
@@ -616,9 +619,9 @@ MonoBehaviour:
   enableDeathAnimation: 1
   deathJumpForce: 10
   deathFreezeTime: 0.5
-  damageSound: {fileID: 0}
-  deathSound: {fileID: 0}
-  healSound: {fileID: 0}
+  damageSound: {fileID: 8300000, guid: a3d67a05a6b949c46ae088f9edbe205e, type: 3}
+  deathSound: {fileID: 8300000, guid: 37b63c8453ba98747988d6b425c21e95, type: 3}
+  healSound: {fileID: 8300000, guid: 3fa1916085e76124cbf5031e48477ca8, type: 3}
   showDebugLogs: 1
 --- !u!70 &6980943678482996010
 CapsuleCollider2D:
@@ -707,7 +710,7 @@ MonoBehaviour:
   playerSprite: {fileID: 1671195669145660529}
   wandSprite: {fileID: 4603390866278502707}
   maxGlowIntensity: 1.5
-  outOfManaSound: {fileID: 0}
+  outOfManaSound: {fileID: 8300000, guid: 8988bcbe88a4f6c4a84ef873e1d42284, type: 3}
   lowManaWarningSound: {fileID: 0}
 --- !u!114 &6628514027751848818
 MonoBehaviour:
@@ -721,6 +724,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b1647bb9448ba4589467f229039c84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerVisibility
+  enableGlow: 1
+  glowColor: {r: 0.8, g: 0.9, b: 1, a: 0.8}
+  glowPulseSpeed: 2
+  glowSize: 1.5
+  glowLayers: 2
+  flashOnDamage: 1
+  damageFlashColor: {r: 1, g: 0.3, b: 0.3, a: 0.8}
+  flashDuration: 0.2
+  enhanceDashTrail: 1
+  dashGlowColor: {r: 0.5, g: 1, b: 1, a: 0.7}
 --- !u!1 &4643864467780023090
 GameObject:
   m_ObjectHideFlags: 0

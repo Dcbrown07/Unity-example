@@ -2695,6 +2695,26 @@ PrefabInstance:
       propertyPath: hasShield
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6875589266103347003, guid: 0b1e90b78b9e8124086dff1825fcd310, type: 3}
+      propertyPath: blockSound
+      value: 
+      objectReference: {fileID: 8300000, guid: aa016d3f3f8f8c248b126a4f54d5b32a, type: 3}
+    - target: {fileID: 8296436089260405076, guid: 0b1e90b78b9e8124086dff1825fcd310, type: 3}
+      propertyPath: hurtSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 579fd7a34f174c840af7782491998308, type: 3}
+    - target: {fileID: 8296436089260405076, guid: 0b1e90b78b9e8124086dff1825fcd310, type: 3}
+      propertyPath: roarSound
+      value: 
+      objectReference: {fileID: 8300000, guid: b68b2f1a8a5d0c8478a349779bd34bce, type: 3}
+    - target: {fileID: 8296436089260405076, guid: 0b1e90b78b9e8124086dff1825fcd310, type: 3}
+      propertyPath: whipSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 82a5087ead0247e47938102f92596011, type: 3}
+    - target: {fileID: 8296436089260405076, guid: 0b1e90b78b9e8124086dff1825fcd310, type: 3}
+      propertyPath: deathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 543b693a92e89a341bcde02e6d1f136c, type: 3}
     - target: {fileID: 9036999141487849278, guid: 0b1e90b78b9e8124086dff1825fcd310, type: 3}
       propertyPath: m_LocalPosition.x
       value: 19.74
@@ -2774,7 +2794,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 432a03a7e346b5749bf692df19e9934a, type: 3}
+  m_Resource: {fileID: 8300000, guid: 6a315cd6c01426c4492ff15896b5d455, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1889659234281448897}
   - component: {fileID: 6802334064254258157}
   - component: {fileID: 9199777984730264622}
-  - component: {fileID: 5277652419605204738}
+  - component: {fileID: 3561015974312301935}
   m_Layer: 0
   m_Name: Orb
   m_TagString: Untagged
@@ -138,8 +138,8 @@ MonoBehaviour:
   lifetime: 15
   bounceSpeedMultiplier: 1.08
   postBounceLifetime: 6
-  bounceSfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
-  hitEnemySfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
+  bounceSfx: {fileID: 8300000, guid: f7ef2fa267735db46bca7db1b9ebce60, type: 3}
+  hitEnemySfx: {fileID: 8300000, guid: 2acf2c92137315d4e8fd8aa3fc2ddb0e, type: 3}
   hitPlayerSfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
   parrySfx: {fileID: 8300000, guid: e25c4ad14e3d5304886545d0868aece1, type: 3}
   spinSpeed: 720
@@ -148,7 +148,7 @@ MonoBehaviour:
   hitEnemyEffect: {fileID: 0}
   parryEffect: {fileID: 0}
   damageAmount: 1
---- !u!60 &5277652419605204738
+--- !u!60 &3561015974312301935
 PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -194,12 +194,37 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.03125, y: 0.15625}
-      - {x: -0.09375, y: 0.09375}
-      - {x: -0.09375, y: 0.03125}
-      - {x: -0.03125, y: -0.03125}
-      - {x: 0.03125, y: -0.03125}
-      - {x: 0.09375, y: 0.03125}
-      - {x: 0.09375, y: 0.09375}
-      - {x: 0.03125, y: 0.15625}
+    - - {x: -0.25, y: -0.19}
+      - {x: -0.26999998, y: -0.19999999}
+      - {x: -0.26999998, y: -0.22999999}
+      - {x: -0.25, y: -0.26}
+      - {x: -0.22999999, y: -0.26}
+      - {x: -0.19999999, y: -0.22999999}
+      - {x: -0.19999999, y: -0.22}
+      - {x: -0.21, y: -0.19}
+    - - {x: -0.32, y: -0.16}
+      - {x: -0.29, y: -0.14999999}
+      - {x: -0.29, y: -0.12}
+      - {x: -0.31, y: -0.099999994}
+      - {x: -0.32, y: -0.099999994}
+    - - {x: 0.12, y: 0.14999999}
+      - {x: -0.03, y: 0.22}
+      - {x: -0.08, y: 0.22}
+      - {x: -0.11, y: 0.21}
+      - {x: -0.17, y: 0.04}
+      - {x: -0.17, y: -0.03}
+      - {x: -0.11, y: -0.14999999}
+      - {x: 0.29, y: -0.14999999}
+      - {x: 0.31, y: -0.13}
+      - {x: 0.31, y: 0.06}
+      - {x: 0.26, y: 0.17999999}
+    - - {x: -0.19, y: 0.28}
+      - {x: -0.21, y: 0.26999998}
+      - {x: -0.21, y: 0.22}
+      - {x: -0.19999999, y: 0.17999999}
+      - {x: -0.17999999, y: 0.17}
+      - {x: -0.12, y: 0.17}
+      - {x: -0.11, y: 0.19999999}
+      - {x: -0.11, y: 0.24}
+      - {x: -0.14999999, y: 0.28}
   m_UseDelaunayMesh: 0
