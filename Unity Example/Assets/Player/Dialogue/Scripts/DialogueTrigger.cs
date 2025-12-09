@@ -1,174 +1,234 @@
 using UnityEngine;
-using System.Collections.Generic;
+using UnityEngine.UI;
+using System.Collections;
 
 public class DialogueTrigger : MonoBehaviour
 {
-    [Header("Dialogue Content")]
-    [Tooltip("Lines of dialogue to display")]
-    public List<DialogueLine> dialogueLines = new List<DialogueLine>();
-
-    [Header("Trigger Settings")]
-    [Tooltip("Trigger automatically on enter or require button press")]
-    public bool autoTrigger = true;
+    [Header("Dialogue Settings")]
+    [TextArea(3, 10)]
+    public string[] dialogueLines; // Array of text lines
     
-    [Tooltip("Key to trigger dialogue (if not auto)")]
-    public KeyCode triggerKey = KeyCode.E;
-    
-    [Tooltip("Only trigger once, then disable")]
+    [Tooltip("Trigger once and then disable")]
     public bool triggerOnce = true;
     
-    [Tooltip("Destroy trigger after use")]
-    public bool destroyAfterTrigger = false;
-
-    [Header("UI Prompt")]
-    [Tooltip("Show 'Press E to talk' prompt")]
-    public GameObject interactPrompt;
-
-    [Header("Conditions")]
-    [Tooltip("Only trigger if player has wand")]
-    public bool requiresWand = false;
+    [Tooltip("Require key press to advance (E key)")]
+    public bool requireKeyPress = true;
     
-    [Tooltip("Delay before dialogue can trigger (seconds)")]
-    public float triggerDelay = 0f;
-
+    [Tooltip("Auto-advance time per line (if not requiring key press)")]
+    public float autoAdvanceTime = 3f;
+    
+    [Tooltip("Pause player movement during dialogue")]
+    public bool pausePlayer = false; // Default to FALSE so player can keep moving
+    
+    [Header("Visual Settings")]
+    [Tooltip("Optional: Use a custom dialogue box prefab (leave empty to auto-generate)")]
+    public GameObject customDialogueBoxPrefab;
+    
+    [Tooltip("Name of Text component in custom prefab (default: 'DialogueText')")]
+    public string textComponentName = "DialogueText";
+    
+    public Color textBoxColor = new Color(0f, 0f, 0f, 0.8f);
+    public Color textColor = Color.white;
+    public int fontSize = 24;
+    
     private bool hasTriggered = false;
-    private bool playerInRange = false;
-    private float enableTime;
+    private bool isShowingDialogue = false;
+    private GameObject dialogueBox;
+    private Text dialogueText;
+    private int currentLine = 0;
+    private GameObject player;
 
-    void Start()
+    void OnTriggerEnter2D(Collider2D other)
     {
-        enableTime = Time.time;
-        
-        if (interactPrompt != null)
+        if (other.CompareTag("Player") && !hasTriggered)
         {
-            interactPrompt.SetActive(false);
+            player = other.gameObject;
+            ShowDialogue();
+            
+            if (triggerOnce)
+            {
+                hasTriggered = true;
+            }
         }
+    }
 
-        // Validation
-        if (dialogueLines.Count == 0)
+    void ShowDialogue()
+    {
+        if (isShowingDialogue || dialogueLines.Length == 0) return;
+        
+        isShowingDialogue = true;
+        currentLine = 0;
+        
+        // Pause player if needed
+        if (pausePlayer && player != null)
         {
-            Debug.LogWarning($"DialogueTrigger on {gameObject.name} has no dialogue lines!");
+            var controller = player.GetComponent<PlayerController2D>();
+            if (controller != null) controller.enabled = false;
+        }
+        
+        CreateDialogueBox();
+        DisplayCurrentLine();
+    }
+
+    void CreateDialogueBox()
+    {
+        // Find or create canvas
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            GameObject canvasObj = new GameObject("DialogueCanvas");
+            canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObj.AddComponent<CanvasScaler>();
+            canvasObj.AddComponent<GraphicRaycaster>();
+        }
+        
+        // Use custom prefab if provided
+        if (customDialogueBoxPrefab != null)
+        {
+            dialogueBox = Instantiate(customDialogueBoxPrefab, canvas.transform);
+            
+            // Find text component by name
+            Transform textTransform = dialogueBox.transform.Find(textComponentName);
+            if (textTransform != null)
+            {
+                dialogueText = textTransform.GetComponent<Text>();
+            }
+            
+            // If not found by name, try to find any Text component
+            if (dialogueText == null)
+            {
+                dialogueText = dialogueBox.GetComponentInChildren<Text>();
+            }
+            
+            if (dialogueText == null)
+            {
+                Debug.LogError($"Could not find Text component in custom dialogue box! Looking for: '{textComponentName}'");
+            }
+            
+            return;
+        }
+        
+        // Otherwise, create default dialogue box
+        dialogueBox = new GameObject("DialogueBox");
+        dialogueBox.transform.SetParent(canvas.transform, false);
+        
+        RectTransform boxRect = dialogueBox.AddComponent<RectTransform>();
+        boxRect.anchorMin = new Vector2(0.1f, 0.1f);
+        boxRect.anchorMax = new Vector2(0.9f, 0.3f);
+        boxRect.offsetMin = Vector2.zero;
+        boxRect.offsetMax = Vector2.zero;
+        
+        Image boxImage = dialogueBox.AddComponent<Image>();
+        boxImage.color = textBoxColor;
+        
+        // Create text
+        GameObject textObj = new GameObject("DialogueText");
+        textObj.transform.SetParent(dialogueBox.transform, false);
+        
+        RectTransform textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = new Vector2(0.05f, 0.1f);
+        textRect.anchorMax = new Vector2(0.95f, 0.9f);
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+        
+        dialogueText = textObj.AddComponent<Text>();
+        dialogueText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        dialogueText.fontSize = fontSize;
+        dialogueText.color = textColor;
+        dialogueText.alignment = TextAnchor.MiddleLeft;
+        
+        // Add prompt text if using key press
+        if (requireKeyPress)
+        {
+            GameObject promptObj = new GameObject("PromptText");
+            promptObj.transform.SetParent(dialogueBox.transform, false);
+            
+            RectTransform promptRect = promptObj.AddComponent<RectTransform>();
+            promptRect.anchorMin = new Vector2(0.8f, 0.05f);
+            promptRect.anchorMax = new Vector2(0.95f, 0.15f);
+            promptRect.offsetMin = Vector2.zero;
+            promptRect.offsetMax = Vector2.zero;
+            
+            Text promptText = promptObj.AddComponent<Text>();
+            promptText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            promptText.fontSize = fontSize - 6;
+            promptText.color = new Color(1f, 1f, 1f, 0.7f);
+            promptText.alignment = TextAnchor.MiddleRight;
+            promptText.text = "Press E";
+        }
+    }
+
+    void DisplayCurrentLine()
+    {
+        if (currentLine < dialogueLines.Length && dialogueText != null)
+        {
+            dialogueText.text = dialogueLines[currentLine];
+            
+            if (!requireKeyPress)
+            {
+                StartCoroutine(AutoAdvance());
+            }
+        }
+        else
+        {
+            EndDialogue();
         }
     }
 
     void Update()
     {
-        if (playerInRange && !autoTrigger && !hasTriggered)
+        if (isShowingDialogue && requireKeyPress && Input.GetKeyDown(KeyCode.E))
         {
-            if (Input.GetKeyDown(triggerKey))
-            {
-                TriggerDialogue();
-            }
+            NextLine();
         }
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void NextLine()
     {
-        if (other.CompareTag("Player"))
+        currentLine++;
+        
+        if (currentLine < dialogueLines.Length)
         {
-            playerInRange = true;
-
-            // Check if enough time has passed
-            if (Time.time < enableTime + triggerDelay)
-            {
-                return;
-            }
-
-            // Check wand requirement
-            if (requiresWand)
-            {
-                PlayerCombat2D combat = other.GetComponent<PlayerCombat2D>();
-                if (combat == null || !HasWand(combat))
-                {
-                    return;
-                }
-            }
-
-            if (autoTrigger && !hasTriggered)
-            {
-                TriggerDialogue();
-            }
-            else if (!autoTrigger && interactPrompt != null)
-            {
-                interactPrompt.SetActive(true);
-            }
+            DisplayCurrentLine();
+        }
+        else
+        {
+            EndDialogue();
         }
     }
 
-    void OnTriggerExit2D(Collider2D other)
+    IEnumerator AutoAdvance()
     {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = false;
-            
-            if (interactPrompt != null)
-            {
-                interactPrompt.SetActive(false);
-            }
-        }
+        yield return new WaitForSeconds(autoAdvanceTime);
+        NextLine();
     }
 
-    bool HasWand(PlayerCombat2D combat)
+    void EndDialogue()
     {
-        // Use reflection or make hasWand public
-        // For now, assume if they can shoot, they have wand
-        return true; // You'll need to expose hasWand as public in PlayerCombat2D
-    }
-
-    void TriggerDialogue()
-    {
-        if (hasTriggered && triggerOnce) return;
-        if (DialogueManager.Instance == null)
+        isShowingDialogue = false;
+        
+        if (dialogueBox != null)
         {
-            Debug.LogError("DialogueManager not found in scene!");
-            return;
+            Destroy(dialogueBox);
         }
-
-        if (dialogueLines.Count == 0)
+        
+        // Resume player
+        if (pausePlayer && player != null)
         {
-            Debug.LogWarning("No dialogue lines to display!");
-            return;
-        }
-
-        // Start dialogue
-        DialogueManager.Instance.StartDialogue(dialogueLines);
-
-        hasTriggered = true;
-
-        // Hide prompt
-        if (interactPrompt != null)
-        {
-            interactPrompt.SetActive(false);
-        }
-
-        // Destroy or disable
-        if (destroyAfterTrigger)
-        {
-            Destroy(gameObject, 0.5f);
-        }
-        else if (triggerOnce)
-        {
-            GetComponent<Collider2D>().enabled = false;
+            var controller = player.GetComponent<PlayerController2D>();
+            if (controller != null) controller.enabled = true;
         }
     }
 
     void OnDrawGizmos()
     {
-        // Draw trigger zone
-        Gizmos.color = new Color(0f, 1f, 0f, 0.3f);
-        
+        // Show trigger area in editor
+        Gizmos.color = new Color(0f, 1f, 1f, 0.3f);
         Collider2D col = GetComponent<Collider2D>();
         if (col != null)
         {
-            if (col is BoxCollider2D box)
-            {
-                Gizmos.matrix = transform.localToWorldMatrix;
-                Gizmos.DrawWireCube(box.offset, box.size);
-            }
-            else if (col is CircleCollider2D circle)
-            {
-                Gizmos.DrawWireSphere(transform.position, circle.radius);
-            }
+            Gizmos.DrawCube(transform.position, col.bounds.size);
         }
     }
 }
